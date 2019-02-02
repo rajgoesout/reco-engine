@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1>Here are all your movies</h1>
+<h1>Please rate at least 5 movies</h1>
+{% for movie in movies %}
+<h2>{{movie.title}} ({{movie.year}})</h2>
+<p>Genres: {{movie.genres}}</p>
+<p>Plot: {{movie.plot}}</p>
+<p>Imdb Rating: {{movie.imdb.rating}}</p>
+<img src="{{movie.poster}}" alt="">
+{% endfor %}
+
+{% endblock %}
