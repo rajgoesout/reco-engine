@@ -1,4 +1,4 @@
-from flask import render_template, flash, redirect, url_for, request
+from flask import render_template, flash, redirect, url_for, request, session
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.urls import url_parse
 from mreco import app, db, login
@@ -22,7 +22,12 @@ def load_user(username):
 @app.route('/index')
 def index():
     movies = Movie.objects.all()
-    return render_template('index.html', title='Home', current_user=current_user, movies=movies)
+    if session:
+        print(session['user_id'])
+        this_u = User.objects(id=session['user_id'])
+        return render_template('index.html', title='Home', this_u=this_u, current_user=current_user, movies=movies)
+    else:
+        return render_template('index.html', title='Home', this_u=current_user, current_user=current_user, movies=movies)
 
 
 @app.route('/users/<username>', methods=['GET'])
