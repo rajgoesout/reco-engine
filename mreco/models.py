@@ -2,16 +2,19 @@ from datetime import datetime
 from mreco import db, login
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-
+from mongoengine.fields import SequenceField
 
 class Movie(db.DynamicDocument):
     meta = {
-        'collection': 'imcoll'
+        'collection': 'movie'
     }
+    # movie_id = db.IntField(primary_key=True)
 
 
 class User(UserMixin, db.Document):
     # id = db.IntField(primary_key=True)
+    # user_id = db.IntField(autoincrement=True, primary_key=True, unique=True)
+    # user_id = SequenceField(collection_name='user', db_alias='imovies', primary_key=True)
     username = db.StringField(max_length=64, index=True, unique=True)
     email = db.StringField(max_length=120, index=True, unique=True)
     password_hash = db.StringField(max_length=128)
@@ -26,16 +29,22 @@ class User(UserMixin, db.Document):
         return check_password_hash(self.password_hash, password)
 
 
-@login.user_loader
-def load_user(username):
-    # users = User.objects.all()
-    # if username not in users:
-    #     return
-    # user = User()
-    # user.id = username
-    # return user
-    # return User.objects(int(user_id))
-    return User.objects(username=username)
+class Rating(db.Document):
+    movie_id = db.ListField(db.ReferenceField(Movie))
+    user_id = db.ListField(db.ReferenceField(User))
+    score = db.IntField()
+
+
+# @login.user_loader
+# def load_user(username):
+#     # users = User.objects.all()
+#     # if username not in users:
+#     #     return
+#     # user = User()
+#     # user.id = username
+#     # return user
+#     # return User.objects(int(user_id))
+#     return User.objects(username=username)
 
 # @login.request_loader
 # def request_loader(request):

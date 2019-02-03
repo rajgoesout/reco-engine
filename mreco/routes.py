@@ -3,7 +3,19 @@ from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.urls import url_parse
 from mreco import app, db, login
 from mreco.forms import LoginForm, RegistrationForm
-from mreco.models import Movie, User
+from mreco.models import Movie, User, Rating
+
+
+@login.user_loader
+def load_user(username):
+    # users = User.objects.all()
+    # if username not in users:
+    #     return
+    # user = User()
+    # user.id = username
+    # return user
+    # return User.objects(int(user_id))
+    return User.objects(username=username)
 
 
 @app.route('/')
@@ -12,6 +24,19 @@ def index():
     movies = Movie.objects.all()
     return render_template('index.html', title='Home', current_user=current_user, movies=movies)
 
+
+@app.route('/users/<username>', methods=['GET'])
+def show_user(username):
+    users = User.objects.all()
+    user = User.objects.get(username=username)
+    return render_template('user.html', user=user)
+
+
+@app.route('/movies/<int:movie_id>', methods=['GET'])
+def show_movie(movie_id):
+    movies = Movie.objects.all()
+    movie = Movie.objects.get(movie_id=movie_id)
+    return render_template('movie.html', current_user=current_user, movie=movie)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -24,7 +49,7 @@ def login():
         if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password')
             return redirect(url_for('login'))
-        v=login_user(user, remember=form.remember_me.data, force=True)
+        v = login_user(user, remember=form.remember_me.data, force=True)
         print(v)
         next_page = request.args.get('next')
         if not next_page or url_parse(next_page).netloc != '':
@@ -33,7 +58,6 @@ def login():
     else:
         print('invalid')
     return render_template('auth/login.html', title='Sign In', form=form)
-
 
 
 # @app.route('/login', methods=['GET', 'POST'])
