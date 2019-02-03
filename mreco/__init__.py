@@ -2,9 +2,10 @@ import os
 
 # from . import routes, models
 from flask import Flask, render_template
-from flask_mongoengine import MongoEngine
+from flask_mongoengine import MongoEngine, MongoEngineSessionInterface
 from flask_migrate import Migrate
 from flask_login import LoginManager
+from flask_mongo_sessions import MongoDBSessionInterface
 
 
 test_config = None
@@ -33,6 +34,9 @@ except OSError:
 
 db = MongoEngine()
 db.init_app(app)
+# app.session_interface = MongoEngineSessionInterface(db)
+# app.session_interface = MongoDBSessionInterface(app, db, 'sessions')
+
 
 login = LoginManager(app)
 login.login_view = 'login'

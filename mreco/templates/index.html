@@ -2,6 +2,8 @@
 
 {% block content %}
 
+<h1>Hi, {{ current_user.username }}!</h1>
+
 <h1>Here are all your movies</h1>
 <h1>Please rate at least 5 movies</h1>
 {% for movie in movies %}

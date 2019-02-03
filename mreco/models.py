@@ -10,33 +10,44 @@ class Movie(db.DynamicDocument):
     }
 
 
-# class User(UserMixin, db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     username = db.Column(db.String(64), index=True, unique=True)
-#     email = db.Column(db.String(120), index=True, unique=True)
-#     password_hash = db.Column(db.String(128))
-#     posts = db.relationship('Post', backref='author', lazy='dynamic')
+class User(UserMixin, db.Document):
+    # id = db.IntField(primary_key=True)
+    username = db.StringField(max_length=64, index=True, unique=True)
+    email = db.StringField(max_length=120, index=True, unique=True)
+    password_hash = db.StringField(max_length=128)
 
-#     def __repr__(self):
-#         return '<User {}>'.format(self.username)
+    def __repr__(self):
+        return '<User {}>'.format(self.username)
 
-#     def set_password(self, password):
-#         self.password_hash = generate_password_hash(password)
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
 
-#     def check_password(self, password):
-#         return check_password_hash(self.password_hash, password)
-
-
-# @login.user_loader
-# def load_user(id):
-#     return User.query.get(int(id))
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
 
 
-# class Post(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     body = db.Column(db.String(140))
-#     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-#     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+@login.user_loader
+def load_user(username):
+    # users = User.objects.all()
+    # if username not in users:
+    #     return
+    # user = User()
+    # user.id = username
+    # return user
+    # return User.objects(int(user_id))
+    return User.objects(username=username)
 
-#     def __repr__(self):
-#         return '<Post {}>'.format(self.body)
+# @login.request_loader
+# def request_loader(request):
+#     email = request.form.get('email')
+#     if email not in users:
+#         return
+
+#     user = User()
+#     user.id = email
+
+#     # DO NOT ever store passwords in plaintext and always compare password
+#     # hashes using constant-time comparison!
+#     user.is_authenticated = request.form['password'] == users[email]['password']
+
+#     return user
