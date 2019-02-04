@@ -4,4 +4,15 @@
 
 <h3>{{movie.title}}</h3>
 <img src="{{movie.poster}}" alt="">
+
+<!-- /movies/{{ movie.movie_id }} -->
+<form action="" method="POST">
+    <!-- <label id="score">Rate this movie: </label>
+    <input name="score" type="text">
+    <input type="submit" value="Rate"> -->
+    {{ form.hidden_tag() }}
+    {{form.score.label}}
+    {{form.score}}
+    {{form.submit()}}
+</form>
 {% endblock %}

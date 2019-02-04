@@ -2,8 +2,10 @@ from flask import render_template, flash, redirect, url_for, request, session
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.urls import url_parse
 from mreco import app, db, login
-from mreco.forms import LoginForm, RegistrationForm
+from mreco.forms import LoginForm, RegistrationForm, RatingForm
 from mreco.models import Movie, User, Rating
+from flask_mongoengine.wtf import model_form
+from mongoengine import DoesNotExist
 
 
 @login.user_loader
@@ -37,11 +39,68 @@ def show_user(username):
     return render_template('user.html', user=user)
 
 
-@app.route('/movies/<int:movie_id>', methods=['GET'])
-def show_movie(movie_id):
-    movies = Movie.objects.all()
+# @app.route('/movies/<int:movie_id>', methods=['GET'])
+# def show_movie(movie_id):
+#     movies = Movie.objects.all()
+#     movie = Movie.objects.get(movie_id=movie_id)
+#     return render_template('movie.html', current_user=current_user, movie=movie)
+
+
+# RatingForm = model_form(Rating)
+
+
+@app.route('/movies/<int:movie_id>', methods=['GET', 'POST'])
+def rate_movie(movie_id):
+    user_id = session['user_id']
+    print(user_id)
     movie = Movie.objects.get(movie_id=movie_id)
-    return render_template('movie.html', current_user=current_user, movie=movie)
+    form = RatingForm()
+    # new_score = request.form.get("movie_rating")
+    # new_score = form.score.data
+    # if request.method == 'POST' and form.validate():
+    if form.validate_on_submit():
+        # rating = None
+        # rating = Rating.objects(
+        #     (Rating.user_id == user_id) and (Rating.movie_id == movie_id)).first()
+        # rating = Rating.objects(movie_id=movie_id).first()
+        # print(rating)
+        try:
+            rating = Rating.objects.get(
+                user_id=user_id, movie_id=movie['id'])
+            rating.score = form.score.data
+            print("LG")
+        except DoesNotExist:
+            # del rating
+            rating = Rating(score=form.score.data,
+                            user_id=user_id, movie_id=movie_id)
+        print(movie['id'])
+        print(movie_id)
+        # if rating:
+        # rating.score = form.score.data
+        # else:
+        # rating = Rating(score=form.score.data,
+        #                 user_id=user_id, movie_id=movie_id)
+        # else:
+        # rating = Rating.objects.get(user_id=user_id, movie_id=movie['id'])
+        # rating.score = form.score.data
+        rating.save()
+        print(rating.score)
+    else:
+        print('inv')
+    return render_template('movie.html', form=form, current_user=current_user, movie=movie)
+    # new_score = request.form.get("movie-rating")
+    # rating = Rating.objects(
+    #     (Rating.user_id == user_id) and (Rating.movie_id == movie_id)).first()
+
+    # if not rating:
+    #     rating = Rating(score=new_score, user_id=user_id, movie_id=movie_id)
+    # else:
+    #     rating.score = new_score
+    # rating.save()
+    # movies = Movie.objects.all()
+    # movie = Movie.objects.get(movie_id=movie_id)
+    # return redirect('/movies/%s' % movie_id)
+    # return render_template('movie.html', current_user=current_user, movie=movie)
 
 
 @app.route('/login', methods=['GET', 'POST'])

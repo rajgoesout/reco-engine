@@ -1,7 +1,12 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, FloatField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
 from mreco.models import User
+
+
+class RatingForm(FlaskForm):
+    score = FloatField('Score', validators=[DataRequired()])
+    submit = SubmitField('Rate')
 
 
 class LoginForm(FlaskForm):

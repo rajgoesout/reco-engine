@@ -3,10 +3,13 @@ from mreco import db, login
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from mongoengine.fields import SequenceField
+from flask_mongoengine import BaseQuerySet
+
 
 class Movie(db.DynamicDocument):
     meta = {
-        'collection': 'movie'
+        'collection': 'movie',
+        'queryset_class': BaseQuerySet
     }
     # movie_id = db.IntField(primary_key=True)
 
@@ -20,7 +23,7 @@ class User(UserMixin, db.Document):
     password_hash = db.StringField(max_length=128)
 
     def __repr__(self):
-        return '<User {}>'.format(self.username)
+        return str(self.username)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -30,9 +33,9 @@ class User(UserMixin, db.Document):
 
 
 class Rating(db.Document):
-    movie_id = db.ListField(db.ReferenceField(Movie))
-    user_id = db.ListField(db.ReferenceField(User))
-    score = db.IntField()
+    movie_id = db.ReferenceField(Movie)
+    user_id = db.ReferenceField(User)
+    score = db.DecimalField()
 
 
 # @login.user_loader
