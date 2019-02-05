@@ -33,7 +33,8 @@ class User(UserMixin, db.Document):
 
 
 class Rating(db.Document):
-    movie_id = db.ReferenceField(Movie)
+    # movie_id = db.ReferenceField(Movie)
+    movie_id = db.IntField()
     user_id = db.ReferenceField(User)
     score = db.DecimalField()
 

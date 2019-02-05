@@ -4,8 +4,74 @@ from werkzeug.urls import url_parse
 from mreco import app, db, login
 from mreco.forms import LoginForm, RegistrationForm, RatingForm
 from mreco.models import Movie, User, Rating
+from mreco.recommender import popularity_recommender_py, item_similarity_recommender_py
 from flask_mongoengine.wtf import model_form
 from mongoengine import DoesNotExist
+
+from scipy.sparse import csr_matrix
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import NearestNeighbors, KNeighborsClassifier
+import pandas as pd
+import os
+
+
+def generate_csv():
+    import csv
+    with open('r.csv', 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+        writer.writerow(['user_id', 'movie_id', 'score'])
+        for r in Rating.objects.all():
+            writer.writerow([r.user_id.id, r.movie_id, r.score])
+
+
+def real_stuff():
+    # print('printing')
+    df_movies = pd.read_csv(
+        # os.path.join(data_path, movies_filename),
+        'm.csv',
+        usecols=['movie_id', 'title', 'genres'],
+        dtype={'movie_id': 'int32', 'title': 'str', 'genres': 'str'})
+    # print('printing')
+    print(df_movies.head())
+    generate_csv()
+    df_rating = pd.read_csv(
+        'r.csv',
+        usecols=['user_id', 'movie_id', 'score'],
+        # dtype={'user_id'}
+    )
+    print(df_rating.head())
+    movie_data = pd.merge(df_rating, df_movies, on='movie_id')
+    print(movie_data.head())
+    print(movie_data.groupby('title')[
+          'score'].mean().sort_values(ascending=False).head())
+    print(movie_data.groupby('title')[
+          'score'].count().sort_values(ascending=False).head())
+    ratings_mean_count = pd.DataFrame(
+        movie_data.groupby('title')['score'].mean())
+    ratings_mean_count['rating_counts'] = pd.DataFrame(
+        movie_data.groupby('title')['score'].count())
+    print(ratings_mean_count)
+    # pivot ratings into movie features
+    # df_movie_features = df_rating.pivot(
+    #     index='movie_id',
+    #     columns='user_id',
+    #     values='score'
+    # ).fillna(0)
+    # convert dataframe of movie features to scipy sparse matrix
+    # mat_movie_features = csr_matrix(df_movie_features.values)
+    # print(df_movie_features.head())
+    # print(mat_movie_features)
+
+    # model_knn = NearestNeighbors(
+    #     metric='cosine', algorithm='brute', n_neighbors=20, n_jobs=-1)
+    # neigh = KNeighborsClassifier(n_neighbors=20)
+
+    # train_data, test_data = train_test_split(
+    #     df_rating, test_size=0.20, random_state=0)
+    # pm = popularity_recommender_py()
+    # pm.create(train_data, 'user_id', 'movie_id')
+    # pm.recommend()
+    return df_rating
 
 
 @login.user_loader
@@ -25,10 +91,23 @@ def load_user(username):
 def index():
     movies = Movie.objects.all()
     if session:
+        if 'user_id' not in session.keys():
+            redirect(url_for('login'))
         print(session['user_id'])
         this_u = User.objects(id=session['user_id'])
+        k = Rating.objects.count()
+        df_rating = real_stuff()
+        train_data, test_data = train_test_split(
+            df_rating, test_size=0.20, random_state=0)
+        pm = popularity_recommender_py()
+        pm.create(train_data, 'user_id', 'movie_id')
+        is_model = item_similarity_recommender_py()
+        is_model.create(train_data, 'user_id', 'movie_id')
+        # print(is_model.recommend(session['user_id']))
+        # print(pm.recommend(this_u))
         return render_template('index.html', title='Home', this_u=this_u, current_user=current_user, movies=movies)
     else:
+        print('anonymous')
         return render_template('index.html', title='Home', this_u=current_user, current_user=current_user, movies=movies)
 
 
@@ -66,7 +145,7 @@ def rate_movie(movie_id):
         # print(rating)
         try:
             rating = Rating.objects.get(
-                user_id=user_id, movie_id=movie['id'])
+                user_id=user_id, movie_id=movie_id)
             rating.score = form.score.data
             print("LG")
         except DoesNotExist:
