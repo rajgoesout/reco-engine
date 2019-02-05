@@ -4,6 +4,13 @@
 
 <h1>Hi, {{ this_u }}!</h1>
 
+<h1>Recommended 4 u:</h1>
+{% for ym in ur_movies %}
+<p>{{ym.title}} ({{ym.year}})</p>
+<p>Genres: {{ym.genres}}</p>
+<p>Plot: {{ym.plot}}</p>
+<img src="{{ym.poster}}" alt="">
+{% endfor %}
 <h1>Here are all your movies</h1>
 <h1>Please rate at least 5 movies</h1>
 {% for movie in movies %}

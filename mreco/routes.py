@@ -51,6 +51,9 @@ def real_stuff():
     ratings_mean_count['rating_counts'] = pd.DataFrame(
         movie_data.groupby('title')['score'].count())
     print(ratings_mean_count)
+    this_user_movie_data = movie_data.loc[movie_data['user_id']
+                                          == session['user_id']]
+    print(this_user_movie_data)
     # pivot ratings into movie features
     # df_movie_features = df_rating.pivot(
     #     index='movie_id',
@@ -71,7 +74,10 @@ def real_stuff():
     # pm = popularity_recommender_py()
     # pm.create(train_data, 'user_id', 'movie_id')
     # pm.recommend()
-    return df_rating
+    return [df_movies, df_rating, movie_data, this_user_movie_data,
+            movie_data.groupby('title')['score'].mean(
+            ).sort_values(ascending=False),
+            this_user_movie_data.groupby('title')['score'].mean().sort_values(ascending=False)]
 
 
 @login.user_loader
@@ -96,16 +102,24 @@ def index():
         print(session['user_id'])
         this_u = User.objects(id=session['user_id'])
         k = Rating.objects.count()
-        df_rating = real_stuff()
-        train_data, test_data = train_test_split(
-            df_rating, test_size=0.20, random_state=0)
-        pm = popularity_recommender_py()
-        pm.create(train_data, 'user_id', 'movie_id')
-        is_model = item_similarity_recommender_py()
-        is_model.create(train_data, 'user_id', 'movie_id')
+        mylist = real_stuff()
+        print(mylist[5])
+        rec4u = list(mylist[3].to_dict()['movie_id'].values())
+        print(list(mylist[3].to_dict()['movie_id'].values()))
+        ur_movies = []
+        for ru in rec4u:
+            ur_movies.append(Movie.objects.get(movie_id=ru))
+        for i in range(3):
+            print(ur_movies[i].title)
+        # train_data, test_data = train_test_split(
+        #     df_rating, test_size=0.20, random_state=0)
+        # pm = popularity_recommender_py()
+        # pm.create(train_data, 'user_id', 'movie_id')
+        # is_model = item_similarity_recommender_py()
+        # is_model.create(train_data, 'user_id', 'movie_id')
         # print(is_model.recommend(session['user_id']))
         # print(pm.recommend(this_u))
-        return render_template('index.html', title='Home', this_u=this_u, current_user=current_user, movies=movies)
+        return render_template('index.html', ur_movies=ur_movies, rec4u=rec4u, title='Home', this_u=this_u, current_user=current_user, movies=movies)
     else:
         print('anonymous')
         return render_template('index.html', title='Home', this_u=current_user, current_user=current_user, movies=movies)
