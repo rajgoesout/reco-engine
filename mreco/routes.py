@@ -1,5 +1,5 @@
 from flask import render_template, flash, redirect, url_for, request, session
-from flask_login import login_user, logout_user, current_user, login_required
+from flask_login import login_user, logout_user, current_user
 from werkzeug.urls import url_parse
 from mreco import app, db, login
 from mreco.forms import LoginForm, RegistrationForm, RatingForm
@@ -7,12 +7,14 @@ from mreco.models import Movie, User, Rating
 from mreco.recommender import popularity_recommender_py, item_similarity_recommender_py
 from flask_mongoengine.wtf import model_form
 from mongoengine import DoesNotExist
-
+from flask_security import (
+    Security, MongoEngineUserDatastore, UserMixin, RoleMixin, login_required)
 from scipy.sparse import csr_matrix
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import NearestNeighbors, KNeighborsClassifier
 import pandas as pd
 import os
+# from flask_security.forms import Form, LoginForm
 
 
 def generate_csv():
@@ -96,9 +98,16 @@ def load_user(username):
 @app.route('/index')
 def index():
     movies = Movie.objects.all()
-    if session:
-        if 'user_id' not in session.keys():
-            redirect(url_for('login'))
+    try:
+        a = session['user_id']
+        print(a)
+    # except a.DoesNotExist:
+    #     return 'no'
+    #     # return redirect(url_for('login'))
+    # if not current_user:
+    #     # return redirect(url_for('login'))
+    #     return 'nope'
+    # else:
         print(session['user_id'])
         this_u = User.objects(id=session['user_id'])
         k = Rating.objects.count()
@@ -120,9 +129,38 @@ def index():
         # print(is_model.recommend(session['user_id']))
         # print(pm.recommend(this_u))
         return render_template('index.html', ur_movies=ur_movies, rec4u=rec4u, title='Home', this_u=this_u, current_user=current_user, movies=movies)
-    else:
-        print('anonymous')
-        return render_template('index.html', title='Home', this_u=current_user, current_user=current_user, movies=movies)
+    except KeyError:
+        # return 'no'
+        return redirect(url_for('login'))
+    # if session:
+    #     # if 'user_id' not in session.keys():
+    #     #     redirect(url_for('login'))
+    #     # if g.user is None:
+    #         # raise RequestRedirect(url_for('login'))
+    #     print(session['user_id'])
+    #     this_u = User.objects(id=session['user_id'])
+    #     k = Rating.objects.count()
+    #     mylist = real_stuff()
+    #     print(mylist[5])
+    #     rec4u = list(mylist[3].to_dict()['movie_id'].values())
+    #     print(list(mylist[3].to_dict()['movie_id'].values()))
+    #     ur_movies = []
+    #     for ru in rec4u:
+    #         ur_movies.append(Movie.objects.get(movie_id=ru))
+    #     for i in range(3):
+    #         print(ur_movies[i].title)
+    #     # train_data, test_data = train_test_split(
+    #     #     df_rating, test_size=0.20, random_state=0)
+    #     # pm = popularity_recommender_py()
+    #     # pm.create(train_data, 'user_id', 'movie_id')
+    #     # is_model = item_similarity_recommender_py()
+    #     # is_model.create(train_data, 'user_id', 'movie_id')
+    #     # print(is_model.recommend(session['user_id']))
+    #     # print(pm.recommend(this_u))
+    #     return render_template('index.html', ur_movies=ur_movies, rec4u=rec4u, title='Home', this_u=this_u, current_user=current_user, movies=movies)
+    # else:
+    #     print('anonymous')
+    #     return render_template('index.html', title='Home', this_u=current_user, current_user=current_user, movies=movies)
 
 
 @app.route('/users/<username>', methods=['GET'])
@@ -198,8 +236,11 @@ def rate_movie(movie_id):
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('index'))
+    try:
+        if current_user.is_authenticated:
+            return redirect(url_for('index'))
+    except AttributeError:
+        pass
     form = LoginForm()
     if form.validate_on_submit():
         user = User.objects.filter(username=form.username.data).first()
@@ -246,8 +287,11 @@ def logout():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    if current_user.is_authenticated:
-        return redirect(url_for('index'))
+    try:
+        if current_user.is_authenticated:
+            return redirect(url_for('index'))
+    except AttributeError:
+        pass
     form = RegistrationForm()
     if form.validate_on_submit():
         user = User(username=form.username.data, email=form.email.data)

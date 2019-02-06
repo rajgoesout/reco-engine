@@ -1,10 +1,10 @@
 from datetime import datetime
 from mreco import db, login
 from flask_login import UserMixin
+# from flask_security import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from mongoengine.fields import SequenceField
 from flask_mongoengine import BaseQuerySet
-
 
 class Movie(db.DynamicDocument):
     meta = {
