@@ -1,18 +1,17 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %} {% block content %}
 
-{% block content %}
-
-<h3>{{movie.title}}</h3>
-<img src="{{movie.poster}}" alt="">
-
+<h3>{{ movie.title }} ({{ movie.year }})</h3>
+<a href="/movies/{{ movie.movie_id }}"><img src="{{ movie.poster }}"/></a>
+<p>Genres: {{ movie.genres }}</p>
+<p>Plot: {{ movie.plot }}</p>
+<p>Imdb Rating: {{ movie.imdb.rating }}</p>
+<p></p>
 <!-- /movies/{{ movie.movie_id }} -->
 <form action="" method="POST">
-    <!-- <label id="score">Rate this movie: </label>
-    <input name="score" type="text">
-    <input type="submit" value="Rate"> -->
-    {{ form.hidden_tag() }}
-    {{form.score.label}}
-    {{form.score}}
-    {{form.submit()}}
+  <label id="score">Rate this movie:</label><br />
+  {{ form.hidden_tag() }}
+  {{ form.score.label }}
+  {{ form.score }}
+  {{ form.submit() }}
 </form>
 {% endblock %}

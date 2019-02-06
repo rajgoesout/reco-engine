@@ -15,6 +15,7 @@ from sklearn.neighbors import NearestNeighbors, KNeighborsClassifier
 import pandas as pd
 import os
 # from flask_security.forms import Form, LoginForm
+from surprise import Reader, Dataset, SVD, evaluate, model_selection
 
 
 def generate_csv():
@@ -76,6 +77,16 @@ def real_stuff():
     # pm = popularity_recommender_py()
     # pm.create(train_data, 'user_id', 'movie_id')
     # pm.recommend()
+    reader = Reader()
+    data = Dataset.load_from_df(
+        df_rating[['user_id', 'movie_id', 'score']], reader)
+    data.split(n_folds=5)
+    svd = SVD()
+    print(model_selection.cross_validate(svd, data, measures=['RMSE', 'MAE']))
+    trainset = data.build_full_trainset()
+    svd.fit(trainset)
+    print(df_rating[df_rating['user_id'] == '5c5708f4bb9e3176d7d04cd4'])
+    print(svd.predict('5c5708f4bb9e3176d7d04cd4', 4))
     return [df_movies, df_rating, movie_data, this_user_movie_data,
             movie_data.groupby('title')['score'].mean(
             ).sort_values(ascending=False),
@@ -84,13 +95,6 @@ def real_stuff():
 
 @login.user_loader
 def load_user(username):
-    # users = User.objects.all()
-    # if username not in users:
-    #     return
-    # user = User()
-    # user.id = username
-    # return user
-    # return User.objects(int(user_id))
     return User.objects(username=username)
 
 
@@ -101,13 +105,6 @@ def index():
     try:
         a = session['user_id']
         print(a)
-    # except a.DoesNotExist:
-    #     return 'no'
-    #     # return redirect(url_for('login'))
-    # if not current_user:
-    #     # return redirect(url_for('login'))
-    #     return 'nope'
-    # else:
         print(session['user_id'])
         this_u = User.objects(id=session['user_id'])
         k = Rating.objects.count()
@@ -118,7 +115,7 @@ def index():
         ur_movies = []
         for ru in rec4u:
             ur_movies.append(Movie.objects.get(movie_id=ru))
-        for i in range(3):
+        for i in range(len(ur_movies)):
             print(ur_movies[i].title)
         # train_data, test_data = train_test_split(
         #     df_rating, test_size=0.20, random_state=0)
@@ -168,16 +165,6 @@ def show_user(username):
     users = User.objects.all()
     user = User.objects.get(username=username)
     return render_template('user.html', user=user)
-
-
-# @app.route('/movies/<int:movie_id>', methods=['GET'])
-# def show_movie(movie_id):
-#     movies = Movie.objects.all()
-#     movie = Movie.objects.get(movie_id=movie_id)
-#     return render_template('movie.html', current_user=current_user, movie=movie)
-
-
-# RatingForm = model_form(Rating)
 
 
 @app.route('/movies/<int:movie_id>', methods=['GET', 'POST'])
@@ -257,27 +244,6 @@ def login():
         print('invalid')
     return render_template('auth/login.html', title='Sign In', form=form)
 
-
-# @app.route('/login', methods=['GET', 'POST'])
-# def login():
-#     if request.method == 'GET':
-#         return '''
-#                <form action='login' method='POST'>
-#                 <input type='text' name='email' id='email' placeholder='email'/>
-#                 <input type='password' name='password' id='password' placeholder='password'/>
-#                 <input type='submit' name='submit'/>
-#                </form>
-#                '''
-
-#     email = request.form['email']
-#     users = User.objects.all()
-#     if request.form['password'] == users[email]['password']:
-#         user = User()
-#         user.id = email
-#         login_user(user)
-#         return redirect(flask.url_for('protected'))
-
-#     return 'Bad login'
 
 @app.route('/logout')
 def logout():

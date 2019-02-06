@@ -1,6 +1,5 @@
 import os
 
-# from . import routes, models
 from flask import Flask, render_template
 from flask_mongoengine import MongoEngine, MongoEngineSessionInterface
 from flask_migrate import Migrate
@@ -43,14 +42,7 @@ login.login_view = 'login'
 
 
 from mreco import routes, models
-# from mreco.models import Movie
 
-
-# @app.route('/')
-# @app.route('/index')
-# def index():
-#     movies = Movie.objects.all()
-#     return render_template('index.html', title='Home', movies=movies)
 
 if __name__ == '__main__':
     app.run()

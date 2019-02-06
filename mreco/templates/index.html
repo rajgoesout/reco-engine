@@ -1,26 +1,22 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %} {% block content %}
 
-{% block content %}
+<h2>Hi, {{ this_u }}!</h2>
 
-<h1>Hi, {{ this_u }}!</h1>
-
-<h1>Recommended 4 u:</h1>
+<h2>Recommended for you:</h2>
 {% for ym in ur_movies %}
-<p>{{ym.title}} ({{ym.year}})</p>
-<p>Genres: {{ym.genres}}</p>
-<p>Plot: {{ym.plot}}</p>
-<img src="{{ym.poster}}" alt="">
+<p>{{ ym.title }} ({{ ym.year }})</p>
+<p>Genres: {{ ym.genres }}</p>
+<p>Plot: {{ ym.plot }}</p>
+<a href="/movies/{{ ym.movie_id }}"><img src="{{ ym.poster }}"/></a>
 {% endfor %}
 <h1>Here are all your movies</h1>
 <h1>Please rate at least 5 movies</h1>
 {% for movie in movies %}
-<h2>{{movie.title}} ({{movie.year}})</h2>
-{{movie.imdb.id}}
-{{movie.movie_id}}
-<p>Genres: {{movie.genres}}</p>
-<p>Plot: {{movie.plot}}</p>
-<p>Imdb Rating: {{movie.imdb.rating}}</p>
-<img src="{{movie.poster}}" alt="">
-{% endfor %}
-
-{% endblock %}
+<h2>{{ movie.title }} ({{ movie.year }})</h2>
+{{ movie.imdb.id }}
+{{ movie.movie_id }}
+<p>Genres: {{ movie.genres }}</p>
+<p>Plot: {{ movie.plot }}</p>
+<p>Imdb Rating: {{ movie.imdb.rating }}</p>
+<a href="/movies/{{ movie.movie_id }}"><img src="{{ movie.poster }}"/></a>
+{% endfor %} {% endblock %}
