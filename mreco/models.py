@@ -6,6 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from mongoengine.fields import SequenceField
 from flask_mongoengine import BaseQuerySet
 
+
 class Movie(db.DynamicDocument):
     meta = {
         'collection': 'movie',
@@ -21,6 +22,9 @@ class User(UserMixin, db.Document):
     username = db.StringField(max_length=64, index=True, unique=True)
     email = db.StringField(max_length=120, index=True, unique=True)
     password_hash = db.StringField(max_length=128)
+    # meta = {
+    #     'auto_create_index': False,
+    # }
 
     def __repr__(self):
         return str(self.username)
