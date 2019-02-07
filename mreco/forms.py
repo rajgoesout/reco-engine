@@ -4,6 +4,7 @@ from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
 from mreco.models import User
 from flask_security.forms import LoginForm
 
+
 class RatingForm(FlaskForm):
     score = FloatField('Score', validators=[DataRequired()])
     submit = SubmitField('Rate')

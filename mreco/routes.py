@@ -80,7 +80,7 @@ def real_stuff():
     reader = Reader()
     data = Dataset.load_from_df(
         df_rating[['user_id', 'movie_id', 'score']], reader)
-    data.split(n_folds=5)
+    data.split(n_folds=df_rating.count())
     svd = SVD()
     print(model_selection.cross_validate(svd, data, measures=['RMSE', 'MAE']))
     trainset = data.build_full_trainset()
@@ -108,15 +108,19 @@ def index():
         print(session['user_id'])
         this_u = User.objects(id=session['user_id'])
         k = Rating.objects.count()
-        mylist = real_stuff()
-        print(mylist[5])
-        rec4u = list(mylist[3].to_dict()['movie_id'].values())
-        print(list(mylist[3].to_dict()['movie_id'].values()))
-        ur_movies = []
-        for ru in rec4u:
-            ur_movies.append(Movie.objects.get(movie_id=ru))
-        for i in range(len(ur_movies)):
-            print(ur_movies[i].title)
+        try:
+            mylist = real_stuff()
+            print(mylist[5])
+            rec4u = list(mylist[3].to_dict()['movie_id'].values())
+            print(list(mylist[3].to_dict()['movie_id'].values()))
+            ur_movies = []
+            for ru in rec4u:
+                ur_movies.append(Movie.objects.get(movie_id=ru))
+            for i in range(len(ur_movies)):
+                print(ur_movies[i].title)
+        except pd.core.base.DataError and ValueError:
+            rec4u = []
+            ur_movies = []
         # train_data, test_data = train_test_split(
         #     df_rating, test_size=0.20, random_state=0)
         # pm = popularity_recommender_py()
@@ -185,12 +189,20 @@ def rate_movie(movie_id):
         try:
             rating = Rating.objects.get(
                 user_id=user_id, movie_id=movie_id)
+            # rating = Rating.objects(
+            #     (Rating.user_id == user_id) and (Rating.movie_id == movie_id)).first()
+            # if rating.user_id == user_id:
             rating.score = form.score.data
-            print("LG")
+            #     print("LG")
+            # else:
+            #     print('else')
+            #     rating = Rating.objects.create(score=form.score.data,
+            #                                    user_id=user_id, movie_id=movie_id)
         except DoesNotExist:
             # del rating
-            rating = Rating(score=form.score.data,
-                            user_id=user_id, movie_id=movie_id)
+            print('dne')
+            rating = Rating.objects.create(score=form.score.data,
+                                           user_id=user_id, movie_id=movie_id)
         print(movie['id'])
         print(movie_id)
         # if rating:
@@ -201,8 +213,9 @@ def rate_movie(movie_id):
         # else:
         # rating = Rating.objects.get(user_id=user_id, movie_id=movie['id'])
         # rating.score = form.score.data
-        rating.save()
-        print(rating.score)
+        print(rating.save())
+        # print(dir(rating))
+        print(rating.score, rating.user_id.id, rating.movie_id)
     else:
         print('inv')
     return render_template('movie.html', form=form, current_user=current_user, movie=movie)
