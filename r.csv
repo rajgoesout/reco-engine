@@ -1,2 +1,5 @@
-user_id,movie_id,score
+uid,movie_id,score
 5c5708f4bb9e3176d7d04cd4,240,3.50
+5c59aff2bb9e31adc244abd6,240,4.60
+5c5708f4bb9e3176d7d04cd4,4,3.40
+5c5708f4bb9e3176d7d04cd4,2,4.80
