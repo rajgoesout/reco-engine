@@ -4,25 +4,21 @@
 
 <h2>Recommended for you:</h2>
 {% for mm in mf_movies %}
-<p>{{mm.title}} ({{mm.year}})</p>
+<h3>{{ mm.title }} ({{ mm.year | int }})</h3>
+<a href="/movies/{{ mm.movie_id }}"><img src="{{ mm.poster }}"/></a>
 <p>Genres: {{ mm.genres }}</p>
 <p>Plot: {{ mm.plot }}</p>
-<a href="/movies/{{ mm.movie_id }}"><img src="{{ mm.poster }}"/></a>
-{% endfor %}
-{% for ym in ur_movies %}
-<p>{{ ym.title }} ({{ ym.year }})</p>
+{% endfor %} {% for ym in ur_movies %}
+<p>{{ ym.title }} ({{ ym.year | int }})</p>
 <p>Genres: {{ ym.genres }}</p>
 <p>Plot: {{ ym.plot }}</p>
 <a href="/movies/{{ ym.movie_id }}"><img src="{{ ym.poster }}"/></a>
 {% endfor %}
 <h1>Here are all your movies</h1>
-<h1>Please rate at least 5 movies</h1>
+<h1>Please click on a movie to rate</h1>
 {% for movie in movies %}
-<h2>{{ movie.title }} ({{ movie.year }})</h2>
-{{ movie.imdb.id }}
-{{ movie.movie_id }}
+<h2>{{ movie.title }} ({{ movie.year | int }})</h2>
+<a href="/movies/{{ movie.movie_id }}"><img src="{{ movie.poster }}"/></a>
 <p>Genres: {{ movie.genres }}</p>
 <p>Plot: {{ movie.plot }}</p>
-<p>Imdb Rating: {{ movie.imdb.rating }}</p>
-<a href="/movies/{{ movie.movie_id }}"><img src="{{ movie.poster }}"/></a>
 {% endfor %} {% endblock %}
