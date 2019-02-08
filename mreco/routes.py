@@ -133,6 +133,7 @@ def recommend_movies(predictions, userID, movies, original_ratings, num_recommen
 
     print('User {0} has already rated {1} movies.'.format(
         userID, user_full.shape[0]))
+    num_recommendations = int(user_full.shape[0])
     print('Recommending highest {0} predicted ratings movies not already rated.'.format(
         num_recommendations))
 
