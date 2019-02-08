@@ -3,6 +3,12 @@
 <h2>Hi, {{ this_u }}!</h2>
 
 <h2>Recommended for you:</h2>
+{% for mm in mf_movies %}
+<p>{{mm.title}} ({{mm.year}})</p>
+<p>Genres: {{ mm.genres }}</p>
+<p>Plot: {{ mm.plot }}</p>
+<a href="/movies/{{ mm.movie_id }}"><img src="{{ mm.poster }}"/></a>
+{% endfor %}
 {% for ym in ur_movies %}
 <p>{{ ym.title }} ({{ ym.year }})</p>
 <p>Genres: {{ ym.genres }}</p>
