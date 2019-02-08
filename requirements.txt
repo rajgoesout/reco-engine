@@ -38,7 +38,6 @@ python-dateutil==2.7.5
 python-editor==1.0.4
 pytz==2018.9
 scikit-learn==0.20.2
-scikit-surprise==1.0.6
 scipy==1.2.0
 seaborn==0.9.0
 six==1.12.0
