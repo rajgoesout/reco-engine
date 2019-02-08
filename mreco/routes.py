@@ -17,7 +17,7 @@ import numpy as np
 import os
 import math
 # from flask_security.forms import Form, LoginForm
-from surprise import Reader, Dataset, SVD, evaluate, model_selection
+# from surprise import Reader, Dataset, SVD, evaluate, model_selection
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics.pairwise import pairwise_distances
 from scipy.sparse.linalg import svds
@@ -186,70 +186,70 @@ def matrix_factorization():
     return [already_rated, predictions]
 
 
-def real_stuff():
-    # print('printing')
-    df_movies = pd.read_csv(
-        # os.path.join(data_path, movies_filename),
-        'm.csv',
-        usecols=['movie_id', 'title', 'genres'],
-        dtype={'movie_id': 'int32', 'title': 'str', 'genres': 'str'})
-    # print('printing')
-    print(df_movies.head())
-    generate_csv()
-    df_rating = pd.read_csv(
-        'r.csv',
-        usecols=['user_id', 'movie_id', 'score'],
-        # dtype={'user_id'}
-    )
-    print(df_rating.head())
-    movie_data = pd.merge(df_rating, df_movies, on='movie_id')
-    print(movie_data.head())
-    print(movie_data.groupby('title')[
-          'score'].mean().sort_values(ascending=False).head())
-    print(movie_data.groupby('title')[
-          'score'].count().sort_values(ascending=False).head())
-    ratings_mean_count = pd.DataFrame(
-        movie_data.groupby('title')['score'].mean())
-    ratings_mean_count['rating_counts'] = pd.DataFrame(
-        movie_data.groupby('title')['score'].count())
-    print(ratings_mean_count)
-    this_user_movie_data = movie_data.loc[movie_data['user_id']
-                                          == session['user_id']]
-    print(this_user_movie_data)
-    # pivot ratings into movie features
-    # df_movie_features = df_rating.pivot(
-    #     index='movie_id',
-    #     columns='user_id',
-    #     values='score'
-    # ).fillna(0)
-    # convert dataframe of movie features to scipy sparse matrix
-    # mat_movie_features = csr_matrix(df_movie_features.values)
-    # print(df_movie_features.head())
-    # print(mat_movie_features)
+# def real_stuff():
+#     # print('printing')
+#     df_movies = pd.read_csv(
+#         # os.path.join(data_path, movies_filename),
+#         'm.csv',
+#         usecols=['movie_id', 'title', 'genres'],
+#         dtype={'movie_id': 'int32', 'title': 'str', 'genres': 'str'})
+#     # print('printing')
+#     print(df_movies.head())
+#     generate_csv()
+#     df_rating = pd.read_csv(
+#         'r.csv',
+#         usecols=['user_id', 'movie_id', 'score'],
+#         # dtype={'user_id'}
+#     )
+#     print(df_rating.head())
+#     movie_data = pd.merge(df_rating, df_movies, on='movie_id')
+#     print(movie_data.head())
+#     print(movie_data.groupby('title')[
+#           'score'].mean().sort_values(ascending=False).head())
+#     print(movie_data.groupby('title')[
+#           'score'].count().sort_values(ascending=False).head())
+#     ratings_mean_count = pd.DataFrame(
+#         movie_data.groupby('title')['score'].mean())
+#     ratings_mean_count['rating_counts'] = pd.DataFrame(
+#         movie_data.groupby('title')['score'].count())
+#     print(ratings_mean_count)
+#     this_user_movie_data = movie_data.loc[movie_data['user_id']
+#                                           == session['user_id']]
+#     print(this_user_movie_data)
+#     # pivot ratings into movie features
+#     # df_movie_features = df_rating.pivot(
+#     #     index='movie_id',
+#     #     columns='user_id',
+#     #     values='score'
+#     # ).fillna(0)
+#     # convert dataframe of movie features to scipy sparse matrix
+#     # mat_movie_features = csr_matrix(df_movie_features.values)
+#     # print(df_movie_features.head())
+#     # print(mat_movie_features)
 
-    # model_knn = NearestNeighbors(
-    #     metric='cosine', algorithm='brute', n_neighbors=20, n_jobs=-1)
-    # neigh = KNeighborsClassifier(n_neighbors=20)
+#     # model_knn = NearestNeighbors(
+#     #     metric='cosine', algorithm='brute', n_neighbors=20, n_jobs=-1)
+#     # neigh = KNeighborsClassifier(n_neighbors=20)
 
-    # train_data, test_data = train_test_split(
-    #     df_rating, test_size=0.20, random_state=0)
-    # pm = popularity_recommender_py()
-    # pm.create(train_data, 'user_id', 'movie_id')
-    # pm.recommend()
-    reader = Reader()
-    data = Dataset.load_from_df(
-        df_rating[['user_id', 'movie_id', 'score']], reader)
-    data.split(n_folds=df_rating.count())
-    svd = SVD()
-    print(model_selection.cross_validate(svd, data, measures=['RMSE', 'MAE']))
-    trainset = data.build_full_trainset()
-    svd.fit(trainset)
-    print(df_rating[df_rating['user_id'] == '5c5708f4bb9e3176d7d04cd4'])
-    print(svd.predict('5c5708f4bb9e3176d7d04cd4', 4))
-    return [df_movies, df_rating, movie_data, this_user_movie_data,
-            movie_data.groupby('title')['score'].mean(
-            ).sort_values(ascending=False),
-            this_user_movie_data.groupby('title')['score'].mean().sort_values(ascending=False)]
+#     # train_data, test_data = train_test_split(
+#     #     df_rating, test_size=0.20, random_state=0)
+#     # pm = popularity_recommender_py()
+#     # pm.create(train_data, 'user_id', 'movie_id')
+#     # pm.recommend()
+#     reader = Reader()
+#     data = Dataset.load_from_df(
+#         df_rating[['user_id', 'movie_id', 'score']], reader)
+#     data.split(n_folds=df_rating.count())
+#     svd = SVD()
+#     print(model_selection.cross_validate(svd, data, measures=['RMSE', 'MAE']))
+#     trainset = data.build_full_trainset()
+#     svd.fit(trainset)
+#     print(df_rating[df_rating['user_id'] == '5c5708f4bb9e3176d7d04cd4'])
+#     print(svd.predict('5c5708f4bb9e3176d7d04cd4', 4))
+#     return [df_movies, df_rating, movie_data, this_user_movie_data,
+#             movie_data.groupby('title')['score'].mean(
+#             ).sort_values(ascending=False),
+#             this_user_movie_data.groupby('title')['score'].mean().sort_values(ascending=False)]
 
 
 @login.user_loader
