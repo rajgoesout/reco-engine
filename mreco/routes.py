@@ -41,6 +41,7 @@ def generate_csv():
     udf.insert(0,'user_id',range(1,1+len(udf)))
     rdf=pd.merge(udf,rdf[['uid','movie_id','score']],on='uid')
     print(rdf)
+    rdf.to_csv('r2.csv', index=False)
     return rdf
     
 
@@ -159,6 +160,7 @@ def matrix_factorization():
     ratings = generate_csv()
     print(movies)
     print(ratings)
+    # ratings.to_csv('r2.csv', index=False)
     n_users = ratings.user_id.unique().shape[0]
     n_movies = ratings.movie_id.unique().shape[0]
     print('Number of users = ' + str(n_users) + ' | Number of movies = ' + str(n_movies))
@@ -174,9 +176,14 @@ def matrix_factorization():
     all_user_predicted_ratings = np.dot(np.dot(U, sigma), Vt) + user_ratings_mean.reshape(-1, 1)
     preds = pd.DataFrame(all_user_predicted_ratings, columns = Ratings.columns)
     print(preds)
-    already_rated, predictions = recommend_movies(preds, 1, movies, ratings, 20)
+    print('this is wuw')
+    userID = ratings.loc[ratings['uid']==session['user_id'], 'user_id'].iloc[0]
+    print(type(int(userID)))
+    already_rated, predictions = recommend_movies(preds, userID, movies, ratings, n_movies)
     print(already_rated)
     print(predictions)
+
+    return [already_rated, predictions]
 
 
 def real_stuff():
@@ -274,8 +281,15 @@ def index():
             rec4u = []
             ur_movies = []
         # similarity()
-        matrix_factorization()
-        print('mf')
+        mf_list = matrix_factorization()
+        print(mf_list[1])
+        mf_rec = list(mf_list[1].to_dict()['movie_id'].values())
+        print(mf_rec)
+        mf_movies = []
+        for mfu in mf_rec:
+            mf_movies.append(Movie.objects.get(movie_id=mfu))
+        for i in range(len(mf_movies)):
+            print(mf_movies[i].title)
         # train_data, test_data = train_test_split(
         #     df_rating, test_size=0.20, random_state=0)
         # pm = popularity_recommender_py()
@@ -284,7 +298,7 @@ def index():
         # is_model.create(train_data, 'user_id', 'movie_id')
         # print(is_model.recommend(session['user_id']))
         # print(pm.recommend(this_u))
-        return render_template('index.html', ur_movies=ur_movies, rec4u=rec4u, title='Home', this_u=this_u, current_user=current_user, movies=movies)
+        return render_template('index.html', mf_movies=mf_movies, mf_rec=mf_rec, ur_movies=ur_movies, rec4u=rec4u, title='Home', this_u=this_u, current_user=current_user, movies=movies)
     except KeyError:
         # return 'no'
         return redirect(url_for('login'))
