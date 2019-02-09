@@ -1,35 +1,190 @@
-{% extends "base.html" %} {% block content %}
-<h1>Register</h1>
-<form action="" method="post">
+{% extends "base.html" %} {% block title %}Sign Up | {% endblock %} {% block
+styling %}
+<style>
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-align: center;
+    align-items: center;
+    padding-top: 40px;
+    padding-bottom: 40px;
+    background-color: #f5f5f5;
+  }
+
+  .form-signin {
+    width: 100%;
+    max-width: 420px;
+    padding: 15px;
+    margin: auto;
+  }
+
+  .form-label-group {
+    position: relative;
+    margin-bottom: 1rem;
+  }
+
+  .form-label-group > input,
+  .form-label-group > label {
+    height: 3.125rem;
+    padding: 0.75rem;
+  }
+
+  .form-label-group > label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    width: 100%;
+    margin-bottom: 0; /* Override default `<label>` margin */
+    line-height: 1.5;
+    color: #495057;
+    pointer-events: none;
+    cursor: text; /* Match the input under the label */
+    border: 1px solid transparent;
+    border-radius: 0.25rem;
+    transition: all 0.1s ease-in-out;
+  }
+
+  .form-label-group input::-webkit-input-placeholder {
+    color: transparent;
+  }
+
+  .form-label-group input:-ms-input-placeholder {
+    color: transparent;
+  }
+
+  .form-label-group input::-ms-input-placeholder {
+    color: transparent;
+  }
+
+  .form-label-group input::-moz-placeholder {
+    color: transparent;
+  }
+
+  .form-label-group input::placeholder {
+    color: transparent;
+  }
+
+  .form-label-group input:not(:placeholder-shown) {
+    padding-top: 1.25rem;
+    padding-bottom: 0.25rem;
+  }
+
+  .form-label-group input:not(:placeholder-shown) ~ label {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+    font-size: 12px;
+    color: #777;
+  }
+
+  /* Fallback for Edge
+-------------------------------------------------- */
+  @supports (-ms-ime-align: auto) {
+    .form-label-group > label {
+      display: none;
+    }
+    .form-label-group input::-ms-input-placeholder {
+      color: #777;
+    }
+  }
+
+  /* Fallback for IE
+-------------------------------------------------- */
+  @media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+    .form-label-group > label {
+      display: none;
+    }
+    .form-label-group input:-ms-input-placeholder {
+      color: #777;
+    }
+  }
+</style>
+{% endblock %} {% block navbar %}{% endblock %} {% block content %}
+<form class="form-signin" method="post">
   {{ form.hidden_tag() }}
-  <p>
-    {{ form.username.label }}<br />
-    {{ form.username(size=32) }}<br />
+  <div class="text-center mb-4">
+    <a href="{{ url_for('index') }}">
+      <img
+        class="mb-4"
+        src="{{url_for('static', filename='mr.png')}}"
+        alt=""
+        width="250px"
+        height="100px"
+        style="border-radius: 12px;"
+      />
+    </a>
+    <h1 class="h3 mb-3 font-weight-normal">Sign Up</h1>
+  </div>
+  <div class="form-label-group">
+    <input
+      name="username"
+      type="text"
+      id="username"
+      class="form-control"
+      placeholder="Username"
+      required
+      autofocus
+    />
+    <label for="username">Username</label>
     {% for error in form.username.errors %}
-    <span style="color: red;">[{{ error }}]</span>
+    <span style="color: red;">{{ error }}</span>
     {% endfor %}
-  </p>
-  <p>
-    {{ form.email.label }}<br />
-    {{ form.email(size=64) }}<br />
+  </div>
+
+  <div class="form-label-group">
+    <input
+      name="email"
+      type="text"
+      id="email"
+      class="form-control"
+      placeholder="Email"
+      required
+      autofocus
+    />
+    <label for="email">Email</label>
     {% for error in form.email.errors %}
-    <span style="color: red;">[{{ error }}]</span>
+    <span style="color: red;">{{ error }}</span>
     {% endfor %}
-  </p>
-  <p>
-    {{ form.password.label }}<br />
-    {{ form.password(size=32) }}<br />
+  </div>
+  <div class="form-label-group">
+    <input
+      name="password"
+      type="password"
+      id="inputPassword"
+      class="form-control"
+      placeholder="Password"
+      required
+    />
+    <label for="inputPassword">Password</label>
     {% for error in form.password.errors %}
-    <span style="color: red;">[{{ error }}]</span>
+    <span style="color: red;">{{ error }}</span>
     {% endfor %}
-  </p>
-  <p>
-    {{ form.password2.label }}<br />
-    {{ form.password2(size=32) }}<br />
+  </div>
+  <div class="form-label-group">
+    <input
+      name="password2"
+      type="password"
+      id="inputPassword2"
+      class="form-control"
+      placeholder="Confirm Password"
+      required
+    />
+    <label for="inputPassword2">Confirm Password</label>
     {% for error in form.password2.errors %}
-    <span style="color: red;">[{{ error }}]</span>
+    <span style="color: red;">{{ error }}</span>
     {% endfor %}
-  </p>
-  <p>{{ form.submit() }}</p>
+  </div>
+  <button name="submit" class="btn btn-lg btn-primary btn-block" type="submit">
+    Sign up
+  </button>
+  <br />
+  <h6 style="text-align: center;">
+    Already have a account? <a href="{{ url_for('login') }}">Sign in!</a>
+  </h6>
 </form>
 {% endblock %}

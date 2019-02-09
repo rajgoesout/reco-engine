@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>{% block title %}{% endblock %}mreco</title>
+    <link rel="icon" href="{{ url_for('static', filename='logo.png') }}" />
     <link
       rel="stylesheet"
       href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
@@ -16,34 +17,55 @@
       href="{{ url_for('static', filename='style.css') }}"
     />
     <style>
-      body {
+      /* body {
+        margin: 8px;
+      } */
+      .contents {
         margin: 8px;
       }
       h1 {
         text-align: center;
       }
     </style>
+    {% block styling %}{%endblock%}
   </head>
   <body>
-    <nav>
-      <h1>mreco</h1>
-      <nav>
-        <a href="{{ url_for('index') }}">Home</a>
-        {% if current_user.is_anonymous %}
-        <a href="{{ url_for('login') }}">Login</a>
-        {% else %}
-        <a href="{{ url_for('logout') }}">Logout</a>
-        {% endif %}
-      </nav>
+    {% block navbar %}
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="{{ url_for('index') }}">
+        <img
+          src="{{ url_for('static', filename='mr.png') }}"
+          width="130px"
+          height="50px"
+          style="border-radius: 4px;"
+        />
+      </a>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          {% if current_user.is_anonymous %}
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('login') }}">Sign In</a>
+          </li>
+          {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="">
+              {{ this_u | replace('[', '') | replace(']', '') }}
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('logout') }}">Sign Out</a>
+          </li>
+          {% endif %}
+        </ul>
+      </div>
     </nav>
-    <section class="content">
-      <header>
-        {% block header %}{% endblock %}
-      </header>
-      {% for message in get_flashed_messages() %}
-      <div class="flash">{{ message }}</div>
-      {% endfor %} {% block content %}{% endblock %}
-    </section>
+    {% endblock %}
+    <header>
+      {% block header %}{% endblock %}
+    </header>
+    {% for message in get_flashed_messages() %}
+    <div class="flash">{{ message }}</div>
+    {% endfor %} {% block content %}{% endblock %}
     <script
       src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
       integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"

@@ -1,23 +1,24 @@
+import math
+
 from flask import render_template, flash, redirect, url_for, request, session
 from flask_login import login_user, logout_user, current_user
 from werkzeug.urls import url_parse
+from mongoengine import DoesNotExist
+
 from mreco import app, login
 from mreco.forms import LoginForm, RegistrationForm, RatingForm
 from mreco.models import Movie, User, Rating
 from mreco.recommender import (
     popularity_recommender_py, item_similarity_recommender_py)
-from mongoengine import DoesNotExist
-from flask_security import (
-    Security, MongoEngineUserDatastore, UserMixin, RoleMixin, login_required)
-from sklearn.model_selection import train_test_split
+
 import pandas as pd
 import numpy as np
-import math
-# from flask_security.forms import Form, LoginForm
-# from surprise import Reader, Dataset, SVD, evaluate, model_selection
+
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics.pairwise import pairwise_distances
 from scipy.sparse.linalg import svds
+# from surprise import Reader, Dataset, SVD, evaluate, model_selection
 
 
 def generate_csv():
@@ -26,14 +27,14 @@ def generate_csv():
         writer = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_MINIMAL)
         writer.writerow(['uid', 'movie_id', 'score'])
         for r in Rating.objects.all():
-            writer.writerow([r.user_id.id, r.movie_id, r.score])
+            writer.writerow([int(str(r.user_id.id), 16), r.movie_id, r.score])
     rdf = pd.read_csv('r.csv', usecols=['uid', 'movie_id', 'score'])
 
     with open('u.csv', 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_MINIMAL)
         writer.writerow(['uid'])
         for u in User.objects.all():
-            writer.writerow([u.id])
+            writer.writerow([int(str(u.id), 16)])
     udf = pd.read_csv('u.csv', usecols=['uid'])
     udf.insert(0, 'user_id', range(1, 1+len(udf)))
     rdf = pd.merge(udf, rdf[['uid', 'movie_id', 'score']], on='uid')
@@ -71,14 +72,12 @@ def similarity():
         'm.csv',
         usecols=['movie_id', 'title', 'genres'],
         dtype={'movie_id': 'int32', 'title': 'str', 'genres': 'str'})
-    generate_csv()
-    ratings = pd.read_csv(
-        'r.csv',
-        usecols=['user_id', 'movie_id', 'score'],
-        # dtype={'user_id': 'int32', 'movie_id': 'int32', 'score': 'float'}
-    )
-    train_data, test_data = train_test_split(ratings, test_size=0.5)
+    ratings = generate_csv()
+    print(ratings)
+    train_data, test_data = train_test_split(ratings, test_size=0.2)
+    print('train_data:')
     print(train_data)
+    print('test_data:')
     print(test_data)
     train_data_matrix = train_data.as_matrix(
         columns=['user_id', 'movie_id', 'score'])
@@ -158,16 +157,9 @@ def matrix_factorization():
         'm.csv',
         usecols=['movie_id', 'title', 'genres'],
         dtype={'movie_id': 'int32', 'title': 'str', 'genres': 'str'})
-    # generate_csv()
-    # ratings = pd.read_csv(
-    #     'r.csv',
-    #     usecols=['user_id', 'movie_id', 'score'],
-    #     # dtype={'user_id': 'int32', 'movie_id': 'int32', 'score': 'float'}
-    # )
     ratings = generate_csv()
     print(movies)
     print(ratings)
-    # ratings.to_csv('r2.csv', index=False)
     n_users = ratings.user_id.unique().shape[0]
     n_movies = ratings.movie_id.unique().shape[0]
     print('Number of users = ' + str(n_users) +
@@ -187,10 +179,8 @@ def matrix_factorization():
         np.dot(U, sigma), Vt) + user_ratings_mean.reshape(-1, 1)
     preds = pd.DataFrame(all_user_predicted_ratings, columns=Ratings.columns)
     print(preds)
-    print('this is wuw')
     userID = ratings.loc[ratings['uid'] ==
-                         session['user_id'], 'user_id'].iloc[0]
-    print(type(int(userID)))
+                         str(int(str(session['user_id']), 16)), 'user_id'].iloc[0]
     already_rated, predictions = recommend_movies(
         preds, userID, movies, ratings, n_movies)
     print(already_rated)
@@ -224,10 +214,13 @@ def index():
                 ur_movies.append(Movie.objects.get(movie_id=ru))
             for i in range(len(ur_movies)):
                 print(ur_movies[i].title)
-        except pd.core.base.DataError and ValueError and NameError:
+        except (pd.core.base.DataError, ValueError, NameError):
             rec4u = []
             ur_movies = []
-        # similarity()
+        try:
+            similarity()
+        except (ValueError, NameError):
+            pass
         try:
             mf_list = matrix_factorization()
             print(mf_list[1])
@@ -238,12 +231,11 @@ def index():
                 mf_movies.append(Movie.objects.get(movie_id=mfu))
             for i in range(len(mf_movies)):
                 print(mf_movies[i].title)
-        except IndexError and ZeroDivisionError and ValueError:
+        except (IndexError, ZeroDivisionError, ValueError, NameError):
             mf_rec = []
             mf_movies = []
         return render_template('index.html', mf_movies=mf_movies, mf_rec=mf_rec, ur_movies=ur_movies, rec4u=rec4u, title='Home', this_u=this_u, current_user=current_user, movies=movies)
     except KeyError:
-        # return 'no'
         return redirect(url_for('login'))
 
 
@@ -259,6 +251,7 @@ def rate_movie(movie_id):
     user_id = session['user_id']
     print(user_id)
     movie = Movie.objects.get(movie_id=movie_id)
+    this_u = User.objects(id=session['user_id'])
     form = RatingForm()
     if form.validate_on_submit():
         try:
@@ -266,7 +259,6 @@ def rate_movie(movie_id):
                 user_id=user_id, movie_id=movie_id)
             rating.score = form.score.data
         except DoesNotExist:
-            print('dne')
             rating = Rating.objects.create(
                 score=form.score.data,
                 user_id=user_id,
@@ -274,10 +266,9 @@ def rate_movie(movie_id):
         print(movie['id'])
         print(movie_id)
         print(rating.save())
+        flash('Your rating has been submitted successfully!')
         print(rating.score, rating.user_id.id, rating.movie_id)
-    else:
-        print('inv')
-    return render_template('movie.html', form=form, current_user=current_user, movie=movie)
+    return render_template('movie.html', this_u=this_u, form=form, current_user=current_user, movie=movie)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -289,19 +280,15 @@ def login():
         pass
     form = LoginForm()
     if form.validate_on_submit():
-        print('valid')
         user = User.objects.filter(username=form.username.data).first()
         if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password')
             return redirect(url_for('login'))
-        v = login_user(user, remember=form.remember_me.data, force=True)
-        print(v)
+        login_user(user, remember=form.remember_me.data, force=True)
         next_page = request.args.get('next')
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('index')
         return redirect(next_page)
-    else:
-        print('invalid')
     return render_template('auth/login.html', title='Sign In', form=form)
 
 

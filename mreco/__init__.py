@@ -1,10 +1,8 @@
 import os
 
-from flask import Flask, render_template
-from flask_mongoengine import MongoEngine, MongoEngineSessionInterface
-from flask_migrate import Migrate
+from flask import Flask
+from flask_mongoengine import MongoEngine
 from flask_login import LoginManager
-from flask_mongo_sessions import MongoDBSessionInterface
 
 
 test_config = None
@@ -15,7 +13,7 @@ app.config['MONGODB_SETTINGS'] = {
     'db': 'imovies',
 }
 app.config['TESTING'] = True
-app.config['SECRET_KEY'] = 'wtfiswrongwithya'
+app.config['SECRET_KEY'] = 'thisismysecret'
 app.debug = True
 
 if test_config is None:
@@ -33,8 +31,6 @@ except OSError:
 
 db = MongoEngine()
 db.init_app(app)
-# app.session_interface = MongoEngineSessionInterface(db)
-# app.session_interface = MongoDBSessionInterface(app, db, 'sessions')
 
 
 login = LoginManager(app)

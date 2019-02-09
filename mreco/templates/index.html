@@ -1,16 +1,22 @@
 {% extends 'base.html' %} {% block content %}
-
-<h2>Hi, {{ this_u }}!</h2>
+<h1>mreco</h1>
+<h2>Hi, {{ this_u | replace('[', '') | replace(']', '') }}!</h2>
 
 <h2>Recommended for you:</h2>
 {% for mm in mf_movies %}
 <h3>{{ mm.title }} ({{ mm.year | int }})</h3>
 <a href="/movies/{{ mm.movie_id }}"><img src="{{ mm.poster }}"/></a>
-<p>Genres: {{ mm.genres }}</p>
+<p>
+  Genres:
+  {{ mm.genres | replace('\'', '') | replace('[', '') | replace(']', '') }}
+</p>
 <p>Plot: {{ mm.plot }}</p>
 {% endfor %} {% for ym in ur_movies %}
 <p>{{ ym.title }} ({{ ym.year | int }})</p>
-<p>Genres: {{ ym.genres }}</p>
+<p>
+  Genres:
+  {{ ym.genres | replace('\'', '') | replace('[', '') | replace(']', '') }}
+</p>
 <p>Plot: {{ ym.plot }}</p>
 <a href="/movies/{{ ym.movie_id }}"><img src="{{ ym.poster }}"/></a>
 {% endfor %}
@@ -19,6 +25,9 @@
 {% for movie in movies %}
 <h2>{{ movie.title }} ({{ movie.year | int }})</h2>
 <a href="/movies/{{ movie.movie_id }}"><img src="{{ movie.poster }}"/></a>
-<p>Genres: {{ movie.genres }}</p>
+<p>
+  Genres:
+  {{ movie.genres | replace('\'', '') | replace('[', '') | replace(']', '') }}
+</p>
 <p>Plot: {{ movie.plot }}</p>
 {% endfor %} {% endblock %}
