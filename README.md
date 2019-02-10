@@ -41,4 +41,4 @@ $ flask run
 
 ### Credits
 
-Inspired by this [blog post](https://towardsdatascience.com/the-4-recommendation-engines-that-can-predict-your-movie-tastes-109dc4e10c52)
+Inspired by [https://towardsdatascience.com/the-4-recommendation-engines-that-can-predict-your-movie-tastes-109dc4e10c52](https://towardsdatascience.com/the-4-recommendation-engines-that-can-predict-your-movie-tastes-109dc4e10c52) and [https://towardsdatascience.com/how-to-build-a-simple-song-recommender-296fcbc8c85](https://towardsdatascience.com/how-to-build-a-simple-song-recommender-296fcbc8c85)

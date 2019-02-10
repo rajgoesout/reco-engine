@@ -9,7 +9,7 @@ from mreco import app, login
 from mreco.forms import LoginForm, RegistrationForm, RatingForm
 from mreco.models import Movie, User, Rating
 from mreco.recommender import (
-    popularity_recommender_py, item_similarity_recommender_py)
+    popularity_recommender_py, item_similarity_recommender_py, user_similarity_recommender_py)
 
 import pandas as pd
 import numpy as np
@@ -138,19 +138,48 @@ def user_user():
     train_data, test_data = train_test_split(
         ratings, test_size=0.20, random_state=0)
 
-    pm = popularity_recommender_py()
-    pm.create(ratings, 'user_id', 'movie_id', k=k)
+    is_model = user_similarity_recommender_py()
+    is_model.create(ratings, 'user_id', 'movie_id')
 
-    predictions = pm.recommend(this_u)
+    predictions = is_model.recommend(this_u, k=k)
     print(predictions)
 
     return predictions
 
-    # is_model = recommender.item_similarity_recommender_py()
-    # is_model.create(train_data, 'user_id', 'movie_id')
 
+def item_item():
+    ratings = generate_csv()
+    n_movies = ratings.movie_id.unique().shape[0]
+    print('n_movs:'+str(n_movies))
+    this_u = ratings.loc[ratings['uid'] == str(
+        int(session['user_id'], 16)), 'user_id'].iloc[0]
+    print(this_u)
+    k = ratings[ratings.user_id == this_u].shape[0]
+    print(k)
 
-# def item_item():
+    aggregation_functions = {'score': 'sum'}
+    ratings_grouped = ratings.groupby(ratings['movie_id']).aggregate(
+        aggregation_functions).reset_index()
+    grouped_sum = ratings_grouped['score'].sum()
+    ratings_grouped['percentage'] = ratings_grouped['score'].div(
+        grouped_sum)*100
+    ratings_grouped.sort_values(['score', 'movie_id'],
+                                ascending=[0, 1]).reset_index()
+    print(ratings_grouped)
+
+    users = ratings['user_id'].unique()
+    movies = ratings['movie_id'].unique()
+
+    train_data, test_data = train_test_split(
+        ratings, test_size=0.20, random_state=0)
+
+    is_model = item_similarity_recommender_py()
+    is_model.create(ratings, 'user_id', 'movie_id')
+
+    predictions = is_model.recommend(this_u, k=k)
+    print(predictions)
+
+    return predictions
 
 
 def recommend_movies(predictions, userID, movies, original_ratings, num_recommendations):
@@ -255,10 +284,24 @@ def index():
                 uu_movies.append(Movie.objects.get(movie_id=uuu))
             for i in range(len(uu_movies)):
                 print(uu_movies[i].title)
-        except (pd.core.base.DataError, ValueError, NameError):
+        except (pd.core.base.DataError, IndexError, ValueError, NameError, KeyError):
             uu_rec = []
             uu_movies = []
         print(len(uu_movies))
+        try:
+            ii_list = item_item()
+            print(ii_list)
+            ii_rec = list(ii_list.to_dict()['movie_id'].values())
+            print(ii_rec)
+            ii_movies = []
+            for iiu in ii_rec:
+                ii_movies.append(Movie.objects.get(movie_id=iiu))
+            for i in range(len(ii_movies)):
+                print(ii_movies[i].title)
+        except(pd.core.base.DataError, IndexError, ValueError, NameError, KeyError):
+            ii_rec = []
+            ii_movies = []
+        print(len(ii_movies))
         try:
             mf_list = matrix_factorization()
             print(mf_list[1])
@@ -269,14 +312,15 @@ def index():
                 mf_movies.append(Movie.objects.get(movie_id=mfu))
             for i in range(len(mf_movies)):
                 print(mf_movies[i].title)
-        except (IndexError, ZeroDivisionError, ValueError, NameError):
+        except (IndexError, ZeroDivisionError, ValueError, NameError, KeyError):
             mf_rec = []
             mf_movies = []
         print(len(mf_movies))
         return render_template(
             'index.html',
-            mf_count=len(mf_movies), mf_movies=mf_movies, mf_rec=mf_rec,
             uu_count=len(uu_movies), uu_movies=uu_movies, uu_rec=uu_rec,
+            ii_count=len(ii_movies), ii_movies=ii_movies, ii_rec=ii_rec,
+            mf_count=len(mf_movies), mf_movies=mf_movies, mf_rec=mf_rec,
             title='Home', this_u=this_u, current_user=current_user, movies=movies)
     except KeyError:
         return redirect(url_for('login'))

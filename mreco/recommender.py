@@ -57,11 +57,11 @@ class item_similarity_recommender_py():
         self.user_id = None
         self.item_id = None
         self.cooccurence_matrix = None
-        self.songs_dict = None
-        self.rev_songs_dict = None
+        self.movies_dict = None
+        self.rev_movies_dict = None
         self.item_similarity_recommendations = None
 
-    # Get unique items (songs) corresponding to a given user
+    # Get unique items (movies) corresponding to a given user
     def get_user_items(self, user):
         if user is not None:
             user_data = self.train_data[self.train_data[self.user_id] == user]
@@ -69,57 +69,57 @@ class item_similarity_recommender_py():
 
             return user_items
 
-    # Get unique users for a given item (song)
+    # Get unique users for a given item (movie)
     def get_item_users(self, item):
         item_data = self.train_data[self.train_data[self.item_id] == item]
         item_users = set(item_data[self.user_id].unique())
 
         return item_users
 
-    # Get unique items (songs) in the training data
+    # Get unique items (movies) in the training data
     def get_all_items_train_data(self):
         all_items = list(self.train_data[self.item_id].unique())
 
         return all_items
 
     # Construct cooccurence matrix
-    def construct_cooccurence_matrix(self, user_songs, all_songs):
+    def construct_cooccurence_matrix(self, user_movies, all_movies):
 
         ####################################
-        # Get users for all songs in user_songs.
+        # Get users for all movies in user_movies.
         ####################################
-        user_songs_users = []
-        for i in range(0, len(user_songs)):
-            user_songs_users.append(self.get_item_users(user_songs[i]))
+        user_movies_users = []
+        for i in range(0, len(user_movies)):
+            user_movies_users.append(self.get_item_users(user_movies[i]))
 
         ###############################################
         # Initialize the item cooccurence matrix of size
-        # len(user_songs) X len(songs)
+        # len(user_movies) X len(movies)
         ###############################################
         cooccurence_matrix = np.matrix(
-            np.zeros(shape=(len(user_songs), len(all_songs))), float)
+            np.zeros(shape=(len(user_movies), len(all_movies))), float)
 
         #############################################################
-        # Calculate similarity between user songs and all unique songs
+        # Calculate similarity between user movies and all unique movies
         # in the training data
         #############################################################
-        for i in range(0, len(all_songs)):
-            # Calculate unique listeners (users) of song (item) i
-            songs_i_data = self.train_data[self.train_data[self.item_id]
-                                           == all_songs[i]]
-            users_i = set(songs_i_data[self.user_id].unique())
+        for i in range(0, len(all_movies)):
+            # Calculate unique viewers (users) of movie (item) i
+            movies_i_data = self.train_data[self.train_data[self.item_id]
+                                            == all_movies[i]]
+            users_i = set(movies_i_data[self.user_id].unique())
 
-            for j in range(0, len(user_songs)):
+            for j in range(0, len(user_movies)):
 
-                # Get unique listeners (users) of song (item) j
-                users_j = user_songs_users[j]
+                # Get unique viewers (users) of movie (item) j
+                users_j = user_movies_users[j]
 
-                # Calculate intersection of listeners of songs i and j
+                # Calculate intersection of viewers of movies i and j
                 users_intersection = users_i.intersection(users_j)
 
                 # Calculate cooccurence_matrix[i,j] as Jaccard Index
                 if len(users_intersection) != 0:
-                    # Calculate union of listeners of songs i and j
+                    # Calculate union of viewers of movies i and j
                     users_union = users_i.union(users_j)
 
                     cooccurence_matrix[j, i] = float(
@@ -127,15 +127,16 @@ class item_similarity_recommender_py():
                 else:
                     cooccurence_matrix[j, i] = 0
 
+        print(cooccurence_matrix)
         return cooccurence_matrix
 
     # Use the cooccurence matrix to make top recommendations
 
-    def generate_top_recommendations(self, user, cooccurence_matrix, all_songs, user_songs):
+    def generate_top_recommendations(self, user, cooccurence_matrix, all_movies, user_movies, k):
         print("Non zero values in cooccurence_matrix :%d" %
               np.count_nonzero(cooccurence_matrix))
 
-        # Calculate a weighted average of the scores in cooccurence matrix for all user songs.
+        # Calculate a weighted average of the scores in cooccurence matrix for all user movies.
         user_sim_scores = cooccurence_matrix.sum(
             axis=0)/float(cooccurence_matrix.shape[0])
         user_sim_scores = np.array(user_sim_scores)[0].tolist()
@@ -146,22 +147,22 @@ class item_similarity_recommender_py():
             list(user_sim_scores))), reverse=True)
 
         # Create a dataframe from the following
-        columns = ['user_id', 'song', 'score', 'rank']
+        columns = ['user_id', 'movie', 'score', 'rank']
         index = np.arange(1)  # array of numbers for the number of samples
         df = pd.DataFrame(columns=columns)
 
-        # Fill the dataframe with top 10 item based recommendations
+        # Fill the dataframe with top 'k' item based recommendations
         rank = 1
         for i in range(0, len(sort_index)):
-            if ~np.isnan(sort_index[i][0]) and all_songs[sort_index[i][1]] not in user_songs and rank <= 10:
-                df.loc[len(df)] = [user, all_songs[sort_index[i][1]],
+            if ~np.isnan(sort_index[i][0]) and all_movies[sort_index[i][1]] not in user_movies and rank <= k:
+                df.loc[len(df)] = [user, all_movies[sort_index[i][1]],
                                    sort_index[i][0], rank]
                 rank = rank+1
 
         # Handle the case where there are no recommendations
         if df.shape[0] == 0:
             print(
-                "The current user has no songs for training the item similarity based recommendation model.")
+                "The current user has no movies for training the item similarity based recommendation model.")
             return -1
         else:
             return df
@@ -174,61 +175,255 @@ class item_similarity_recommender_py():
 
     # Use the item similarity based recommender system model to
     # make recommendations
-    def recommend(self, user):
+    def recommend(self, user, k):
 
         ########################################
-        # A. Get all unique songs for this user
+        # A. Get all unique movies for this user
         ########################################
-        user_songs = self.get_user_items(user)
+        user_movies = self.get_user_items(user)
 
-        print("No. of unique songs for the user: %d" % len(user_songs))
+        print("No. of unique movies for the user: %d" % len(user_movies))
 
         ######################################################
-        # B. Get all unique items (songs) in the training data
+        # B. Get all unique items (movies) in the training data
         ######################################################
-        all_songs = self.get_all_items_train_data()
+        all_movies = self.get_all_items_train_data()
 
-        print("no. of unique songs in the training set: %d" % len(all_songs))
+        print("no. of unique movies in the training set: %d" % len(all_movies))
 
         ###############################################
         # C. Construct item cooccurence matrix of size
-        # len(user_songs) X len(songs)
+        # len(user_movies) X len(movies)
         ###############################################
         cooccurence_matrix = self.construct_cooccurence_matrix(
-            user_songs, all_songs)
+            user_movies, all_movies)
 
         #######################################################
         # D. Use the cooccurence matrix to make recommendations
         #######################################################
         df_recommendations = self.generate_top_recommendations(
-            user, cooccurence_matrix, all_songs, user_songs)
+            user, cooccurence_matrix, all_movies, user_movies, k=len(user_movies))
 
         return df_recommendations
 
     # Get similar items to given items
     def get_similar_items(self, item_list):
 
-        user_songs = item_list
+        user_movies = item_list
 
         ######################################################
-        # B. Get all unique items (songs) in the training data
+        # B. Get all unique items (movies) in the training data
         ######################################################
-        all_songs = self.get_all_items_train_data()
+        all_movies = self.get_all_items_train_data()
 
-        print("no. of unique songs in the training set: %d" % len(all_songs))
+        print("no. of unique movies in the training set: %d" % len(all_movies))
 
         ###############################################
         # C. Construct item cooccurence matrix of size
-        # len(user_songs) X len(songs)
+        # len(user_movies) X len(movies)
         ###############################################
         cooccurence_matrix = self.construct_cooccurence_matrix(
-            user_songs, all_songs)
+            user_movies, all_movies)
 
         #######################################################
         # D. Use the cooccurence matrix to make recommendations
         #######################################################
         user = ""
         df_recommendations = self.generate_top_recommendations(
-            user, cooccurence_matrix, all_songs, user_songs)
+            user, cooccurence_matrix, all_movies, user_movies)
+
+        return df_recommendations
+
+
+class user_similarity_recommender_py():
+    """User similarity based Recommender System model."""
+
+    def __init__(self):
+        self.train_data = None
+        self.user_id = None
+        self.item_id = None
+        self.cooccurence_matrix = None
+        self.movies_dict = None
+        self.rev_movies_dict = None
+        self.item_similarity_recommendations = None
+
+    # Get unique items (movies) corresponding to a given user
+    def get_user_items(self, user):
+        if user is not None:
+            user_data = self.train_data[self.train_data[self.user_id] == user]
+            user_items = list(user_data[self.item_id].unique())
+
+            return user_items
+
+    # Get unique users for a given item (movie)
+    def get_item_users(self, item):
+        item_data = self.train_data[self.train_data[self.item_id] == item]
+        item_users = set(item_data[self.user_id].unique())
+
+        return item_users
+
+    # Get unique items (movies) in the training data
+    def get_all_items_train_data(self):
+        all_items = list(self.train_data[self.item_id].unique())
+
+        return all_items
+
+    # Get unique users in the training data
+    def get_all_users_train_data(self):
+        all_users = list(self.train_data[self.user_id].unique())
+
+        return all_users
+
+    # Construct cooccurence matrix
+    def construct_cooccurence_matrix(self, user_movies, all_movies):
+
+        ####################################
+        # Get users for all movies in user_movies.
+        ####################################
+        user_movies_users = []
+        for i in range(0, len(user_movies)):
+            user_movies_users.append(self.get_item_users(user_movies[i]))
+        print('umu='+str(user_movies_users))
+
+        ###############################################
+        # Initialize the item cooccurence matrix of size
+        # len(user_movies) X len(movies)
+        ###############################################
+        cooccurence_matrix = np.matrix(
+            np.zeros(shape=(len(user_movies), len(all_movies))), float)
+
+        #############################################################
+        # Calculate similarity between user movies and all unique movies
+        # in the training data
+        #############################################################
+        for i in range(0, len(all_movies)):
+            # Calculate unique viewers (users) of movie (item) i
+            movies_i_data = self.train_data[self.train_data[self.item_id]
+                                            == all_movies[i]]
+            users_i = set(movies_i_data[self.user_id].unique())
+            print(users_i)
+
+            for j in range(0, len(users_i)):
+
+                # Get unique viewers (users) of movie (item) j
+                users_j = user_movies_users[j]
+
+                # Calculate intersection of viewers of movies i and j
+                users_intersection = users_i.intersection(users_j)
+
+                # Calculate cooccurence_matrix[i,j] as Jaccard Index
+                if len(users_intersection) != 0:
+                    # Calculate union of viewers of movies i and j
+                    users_union = users_i.union(users_j)
+
+                    cooccurence_matrix[j, i] = float(
+                        len(users_intersection))/float(len(users_union))
+                else:
+                    cooccurence_matrix[j, i] = 0
+
+        print(cooccurence_matrix)
+        return cooccurence_matrix
+
+    # Use the cooccurence matrix to make top recommendations
+
+    def generate_top_recommendations(self, user, cooccurence_matrix, all_movies, user_movies, k):
+        print("Non zero values in cooccurence_matrix :%d" %
+              np.count_nonzero(cooccurence_matrix))
+
+        # Calculate a weighted average of the scores in cooccurence matrix for all user movies.
+        user_sim_scores = cooccurence_matrix.sum(
+            axis=0)/float(cooccurence_matrix.shape[0])
+        user_sim_scores = np.array(user_sim_scores)[0].tolist()
+
+        # Sort the indices of user_sim_scores based upon their value
+        # Also maintain the corresponding score
+        sort_index = sorted(((e, i) for i, e in enumerate(
+            list(user_sim_scores))), reverse=True)
+
+        # Create a dataframe from the following
+        columns = ['user_id', 'movie', 'score', 'rank']
+        index = np.arange(1)  # array of numbers for the number of samples
+        df = pd.DataFrame(columns=columns)
+
+        # Fill the dataframe with top 'k' item based recommendations
+        rank = 1
+        for i in range(0, len(sort_index)):
+            if ~np.isnan(sort_index[i][0]) and all_movies[sort_index[i][1]] not in user_movies and rank <= k:
+                df.loc[len(df)] = [user, all_movies[sort_index[i][1]],
+                                   sort_index[i][0], rank]
+                rank = rank+1
+
+        # Handle the case where there are no recommendations
+        if df.shape[0] == 0:
+            print(
+                "The current user has no movies for training the item similarity based recommendation model.")
+            return -1
+        else:
+            return df
+
+    # Create the item similarity based recommender system model
+    def create(self, train_data, user_id, item_id):
+        self.train_data = train_data
+        self.user_id = user_id
+        self.item_id = item_id
+
+    # Use the item similarity based recommender system model to
+    # make recommendations
+    def recommend(self, user, k):
+
+        ########################################
+        # A. Get all unique movies for this user
+        ########################################
+        user_movies = self.get_user_items(user)
+
+        print("No. of unique movies for the user: %d" % len(user_movies))
+
+        ######################################################
+        # B. Get all unique items (movies) in the training data
+        ######################################################
+        all_movies = self.get_all_items_train_data()
+
+        print("no. of unique movies in the training set: %d" % len(all_movies))
+
+        ###############################################
+        # C. Construct item cooccurence matrix of size
+        # len(user_movies) X len(movies)
+        ###############################################
+        cooccurence_matrix = self.construct_cooccurence_matrix(
+            user_movies, all_movies)
+
+        #######################################################
+        # D. Use the cooccurence matrix to make recommendations
+        #######################################################
+        df_recommendations = self.generate_top_recommendations(
+            user, cooccurence_matrix, all_movies, user_movies, k=len(user_movies))
+
+        return df_recommendations
+
+    # Get similar items to given items
+    def get_similar_items(self, item_list):
+
+        user_movies = item_list
+
+        ######################################################
+        # B. Get all unique items (movies) in the training data
+        ######################################################
+        all_movies = self.get_all_items_train_data()
+
+        print("no. of unique movies in the training set: %d" % len(all_movies))
+
+        ###############################################
+        # C. Construct item cooccurence matrix of size
+        # len(user_movies) X len(movies)
+        ###############################################
+        cooccurence_matrix = self.construct_cooccurence_matrix(
+            user_movies, all_movies)
+
+        #######################################################
+        # D. Use the cooccurence matrix to make recommendations
+        #######################################################
+        user = ""
+        df_recommendations = self.generate_top_recommendations(
+            user, cooccurence_matrix, all_movies, user_movies)
 
         return df_recommendations
