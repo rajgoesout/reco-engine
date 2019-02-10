@@ -1,33 +1,97 @@
-{% extends 'base.html' %} {% block content %}
+{% extends 'base.html' %}{% block styling %}
+<style>
+  .homepage {
+    margin: 8px;
+  }
+  #loading {
+    /* width: 100%; */
+    /* height: 100%; */
+    top: 0;
+    left: 0;
+    position: fixed;
+    display: block;
+    /* opacity: 0.7; */
+    /* background-color: #fff; */
+    z-index: 99;
+    text-align: center;
+  }
+</style>
+{% endblock %} {% block content %}
 <h1>mreco</h1>
-<h2>Hi, {{ this_u | replace('[', '') | replace(']', '') }}!</h2>
-
-<h2>Recommended for you:</h2>
-{% for mm in mf_movies %}
-<h3>{{ mm.title }} ({{ mm.year | int }})</h3>
-<a href="/movies/{{ mm.movie_id }}"><img src="{{ mm.poster }}"/></a>
-<p>
-  Genres:
-  {{ mm.genres | replace('\'', '') | replace('[', '') | replace(']', '') }}
-</p>
-<p>Plot: {{ mm.plot }}</p>
-{% endfor %} {% for ym in ur_movies %}
-<p>{{ ym.title }} ({{ ym.year | int }})</p>
-<p>
-  Genres:
-  {{ ym.genres | replace('\'', '') | replace('[', '') | replace(']', '') }}
-</p>
-<p>Plot: {{ ym.plot }}</p>
-<a href="/movies/{{ ym.movie_id }}"><img src="{{ ym.poster }}"/></a>
-{% endfor %}
-<h1>Here are all your movies</h1>
-<h1>Please click on a movie to rate</h1>
-{% for movie in movies %}
-<h2>{{ movie.title }} ({{ movie.year | int }})</h2>
-<a href="/movies/{{ movie.movie_id }}"><img src="{{ movie.poster }}"/></a>
-<p>
-  Genres:
-  {{ movie.genres | replace('\'', '') | replace('[', '') | replace(']', '') }}
-</p>
-<p>Plot: {{ movie.plot }}</p>
-{% endfor %} {% endblock %}
+<div id="loading" class="spinner-grow" role="status">
+  <span class="sr-only">Loading...</span>
+</div>
+<div id="loading" style="visibility:hidden">
+  this is it! huh
+</div>
+<script>
+  document.addEventListener("DOMContentLoaded", function(event) {
+    document.getElementById("#loading").style.visibility = "hidden";
+  });
+</script>
+<div class="homepage">
+  <h2>Hi, {{ this_u | replace('[', '') | replace(']', '') }}!</h2>
+  <h2>Movies recommended for you:</h2>
+  <button type="button" class="btn btn-primary">
+    Recommendations <span class="badge badge-light">{{ mf_count }}</span>
+  </button>
+  <br />
+  <div class="container-fluid row">
+    {% for mm in mf_movies %}
+    <div class="card col-12 col-sm-5 col-md-4 col-lg-3" style="padding: 2px;">
+      <a href="/movies/{{ mm.movie_id }}">
+        <img
+          style="height: 400px;"
+          class="card-img-top"
+          src="{{ mm.poster }}"
+        />
+      </a>
+      <div class="card-body">
+        <h5 class="card-title">{{ mm.title }} ({{ mm.year | int }})</h5>
+        <p class="card-text">
+          Genres:
+          {{ mm.genres | replace('\'', '') | replace('[', '') | replace(']', '') }}
+        </p>
+        <a href="/movies/{{ mm.movie_id }}" class="btn btn-primary"
+          >View details / Rate</a
+        >
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% for ym in ur_movies %}
+  <p>{{ ym.title }} ({{ ym.year | int }})</p>
+  <p>
+    Genres:
+    {{ ym.genres | replace('\'', '') | replace('[', '') | replace(']', '') }}
+  </p>
+  <a href="/movies/{{ ym.movie_id }}"><img src="{{ ym.poster }}"/></a>
+  {% endfor %}
+  <br />
+  <h1>Here are all your movies</h1>
+  <h1>Please click on a movie to rate</h1>
+  <div class="container-fluid row">
+    {% for movie in movies %}
+    <div class="card col-12 col-sm-5 col-md-4 col-lg-3" style="padding: 2px;">
+      <a href="/movies/{{ movie.movie_id }}">
+        <img
+          style="height: 400px;"
+          class="card-img-top"
+          src="{{ movie.poster }}"
+        />
+      </a>
+      <div class="card-body">
+        <h5 class="card-title">{{ movie.title }} ({{ movie.year | int }})</h5>
+        <p class="card-text">
+          Genres:
+          {{ movie.genres | replace('\'', '') | replace('[', '') | replace(']', '') }}
+        </p>
+        <a href="/movies/{{ movie.movie_id }}" class="btn btn-primary"
+          >View details / Rate</a
+        >
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

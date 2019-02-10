@@ -1,12 +1,14 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, FloatField
-from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
+from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, NumberRange
 from mreco.models import User
-# from flask_security.forms import LoginForm
 
 
 class RatingForm(FlaskForm):
-    score = FloatField('Score', validators=[DataRequired()])
+    score = FloatField('Score', validators=[
+        NumberRange(
+            min=0.1, max=5.0, message='Please provide a rating between 0.1 and 5'),
+        DataRequired()])
     submit = SubmitField('Rate')
 
 

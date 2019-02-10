@@ -234,7 +234,8 @@ def index():
         except (IndexError, ZeroDivisionError, ValueError, NameError):
             mf_rec = []
             mf_movies = []
-        return render_template('index.html', mf_movies=mf_movies, mf_rec=mf_rec, ur_movies=ur_movies, rec4u=rec4u, title='Home', this_u=this_u, current_user=current_user, movies=movies)
+        print(len(mf_movies))
+        return render_template('index.html', mf_count=len(mf_movies), mf_movies=mf_movies, mf_rec=mf_rec, ur_movies=ur_movies, rec4u=rec4u, title='Home', this_u=this_u, current_user=current_user, movies=movies)
     except KeyError:
         return redirect(url_for('login'))
 
