@@ -12,17 +12,17 @@ class popularity_recommender_py():
         self.popularity_recommendations = None
 
     # Create the popularity based recommender system model
-    def create(self, train_data, user_id, item_id):
+    def create(self, train_data, user_id, item_id, k):
         self.train_data = train_data
         self.user_id = user_id
         self.item_id = item_id
 
-        # Get a count of user_ids for each unique song as recommendation score
+        # Get a count of user_ids for each unique movie as recommendation score
         train_data_grouped = train_data.groupby([self.item_id]).agg(
             {self.user_id: 'count'}).reset_index()
         train_data_grouped.rename(columns={'user_id': 'score'}, inplace=True)
 
-        # Sort the songs based upon recommendation score
+        # Sort the movies based upon recommendation score
         train_data_sort = train_data_grouped.sort_values(
             ['score', self.item_id], ascending=[0, 1])
 
@@ -30,8 +30,8 @@ class popularity_recommender_py():
         train_data_sort['Rank'] = train_data_sort['score'].rank(
             ascending=0, method='first')
 
-        # Get the top 10 recommendations
-        self.popularity_recommendations = train_data_sort.head(10)
+        # Get the top 'k' recommendations
+        self.popularity_recommendations = train_data_sort.head(k)
 
     # Use the popularity based recommender system model to
     # make recommendations

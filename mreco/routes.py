@@ -112,6 +112,47 @@ def similarity():
     print('Item-based CF RMSE: ' + str(rmse(item_prediction, train_data_matrix)))
 
 
+def user_user():
+    ratings = generate_csv()
+    n_movies = ratings.movie_id.unique().shape[0]
+    print('n_movs:'+str(n_movies))
+    this_u = ratings.loc[ratings['uid'] == str(
+        int(session['user_id'], 16)), 'user_id'].iloc[0]
+    print(this_u)
+    k = ratings[ratings.user_id == this_u].shape[0]
+    print(k)
+
+    aggregation_functions = {'score': 'sum'}
+    ratings_grouped = ratings.groupby(ratings['movie_id']).aggregate(
+        aggregation_functions).reset_index()
+    grouped_sum = ratings_grouped['score'].sum()
+    ratings_grouped['percentage'] = ratings_grouped['score'].div(
+        grouped_sum)*100
+    ratings_grouped.sort_values(['score', 'movie_id'],
+                                ascending=[0, 1]).reset_index()
+    print(ratings_grouped)
+
+    users = ratings['user_id'].unique()
+    movies = ratings['movie_id'].unique()
+
+    train_data, test_data = train_test_split(
+        ratings, test_size=0.20, random_state=0)
+
+    pm = popularity_recommender_py()
+    pm.create(ratings, 'user_id', 'movie_id', k=k)
+
+    predictions = pm.recommend(this_u)
+    print(predictions)
+
+    return predictions
+
+    # is_model = recommender.item_similarity_recommender_py()
+    # is_model.create(train_data, 'user_id', 'movie_id')
+
+
+# def item_item():
+
+
 def recommend_movies(predictions, userID, movies, original_ratings, num_recommendations):
     """Get and sort the user's predictions"""
     user_row_number = userID - 1  # User ID starts at 1, not 0
@@ -205,22 +246,19 @@ def index():
         this_u = User.objects(id=session['user_id'])
         Rating.objects.count()
         try:
-            # mylist = real_stuff()
-            print(mylist[5])
-            rec4u = list(mylist[3].to_dict()['movie_id'].values())
-            print(list(mylist[3].to_dict()['movie_id'].values()))
-            ur_movies = []
-            for ru in rec4u:
-                ur_movies.append(Movie.objects.get(movie_id=ru))
-            for i in range(len(ur_movies)):
-                print(ur_movies[i].title)
+            uu_list = user_user()
+            print(uu_list)
+            uu_rec = list(uu_list.to_dict()['movie_id'].values())
+            print(uu_rec)
+            uu_movies = []
+            for uuu in uu_rec:
+                uu_movies.append(Movie.objects.get(movie_id=uuu))
+            for i in range(len(uu_movies)):
+                print(uu_movies[i].title)
         except (pd.core.base.DataError, ValueError, NameError):
-            rec4u = []
-            ur_movies = []
-        try:
-            similarity()
-        except (ValueError, NameError):
-            pass
+            uu_rec = []
+            uu_movies = []
+        print(len(uu_movies))
         try:
             mf_list = matrix_factorization()
             print(mf_list[1])
@@ -235,7 +273,11 @@ def index():
             mf_rec = []
             mf_movies = []
         print(len(mf_movies))
-        return render_template('index.html', mf_count=len(mf_movies), mf_movies=mf_movies, mf_rec=mf_rec, ur_movies=ur_movies, rec4u=rec4u, title='Home', this_u=this_u, current_user=current_user, movies=movies)
+        return render_template(
+            'index.html',
+            mf_count=len(mf_movies), mf_movies=mf_movies, mf_rec=mf_rec,
+            uu_count=len(uu_movies), uu_movies=uu_movies, uu_rec=uu_rec,
+            title='Home', this_u=this_u, current_user=current_user, movies=movies)
     except KeyError:
         return redirect(url_for('login'))
 
