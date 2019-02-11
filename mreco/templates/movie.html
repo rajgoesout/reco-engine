@@ -119,9 +119,22 @@
 {% endblock %}{% block content %}
 <div style="margin: 8px;">
   <h3>{{ movie.title }} ({{ movie.year | int }})</h3>
-  <div class="poster">
-    <a href="/movies/{{ movie.movie_id }}"><img src="{{ movie.poster }}"/></a>
+  <div
+    class="card col-12 col-sm-6 col-md-5 col-lg-4 col-xl-3"
+    style="padding: 2px; margin: auto;"
+  >
+    <a href="/movies/{{ movie.movie_id }}">
+      <img
+        style="height: 450px;"
+        class="card-img-top"
+        src="{{ movie.poster }}"
+      />
+    </a>
   </div>
+  <br />
+  <!-- <div class="poster">
+    <a href="/movies/{{ movie.movie_id }}"><img src="{{ movie.poster }}"/></a>
+  </div> -->
   <div class="rating-form">
     <!-- /movies/{{ movie.movie_id }} -->
     <form action="" method="POST">

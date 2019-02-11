@@ -19,7 +19,13 @@
 {% endblock %} {% block content %}
 <h1>mreco</h1>
 <div class="homepage">
-  <h2>Hi, {{ this_u | replace('[', '') | replace(']', '') }}! View <a href="#all-movies">all movies</a> </h2>
+  <h2>
+    Hi, {{ this_u | replace('[', '') | replace(']', '') }}! View
+    <a href="#all-movies">all movies</a>
+  </h2>
+  {% if (mf_count < 5) %}
+  <h4>Please rate at least 5 movies</h4>
+  {% endif %}
   <div class="list-group" id="list-tab" role="tablist">
     <a
       class="list-group-item list-group-item-action active"
@@ -28,7 +34,8 @@
       href="#mf"
       role="tab"
       aria-controls="home"
-      >Matrix Factorization</a
+      >Matrix Factorization
+      <span class="badge badge-dark">{{ mf_count }}</span></a
     >
     <a
       class="list-group-item list-group-item-action"
@@ -37,7 +44,8 @@
       href="#uu"
       role="tab"
       aria-controls="profile"
-      >User-user Collaborative Filtering</a
+      >User-user Collaborative Filtering
+      <span class="badge badge-dark">{{ uu_count }}</span></a
     >
     <a
       class="list-group-item list-group-item-action"
@@ -46,11 +54,10 @@
       href="#ii"
       role="tab"
       aria-controls="messages"
-      >Item-item Collaborative Filtering</a
+      >Item-item Collaborative Filtering
+      <span class="badge badge-dark">{{ ii_count }}</span></a
     >
   </div>
-  </div>
-  <h2>Movies recommended for you:</h2>
   <div class="tab-content" id="nav-tabContent">
     <div
       id="mf"
@@ -58,6 +65,9 @@
       role="tabpanel"
       aria-labelledby="list-home-list"
     >
+      {% if mf_count!=0 %}
+      <h2>Movies recommended for you:</h2>
+      {% endif %}
       <button type="button" class="btn btn-primary">
         Recommendations <span class="badge badge-light">{{ mf_count }}</span>
       </button>
@@ -70,13 +80,15 @@
         >
           <a href="/movies/{{ mm.movie_id }}">
             <img
-              style="height: 400px;"
+              style="height: 450px;"
               class="card-img-top"
               src="{{ mm.poster }}"
             />
           </a>
           <div class="card-body">
-            <h5 class="card-title">{{ mm.title }} ({{ mm.year | int }})</h5>
+            <h5 class="card-title" style="height: 38px;">
+              {{ mm.title }} ({{ mm.year | int }})
+            </h5>
             <p class="card-text">
               Genres:
               {{ mm.genres | replace('\'', '') | replace('[', '') | replace(']', '') }}
@@ -91,10 +103,13 @@
     </div>
     <div
       id="uu"
-      class="tab-pane fade show active reco-type"
+      class="tab-pane fade reco-type"
       role="tabpanel"
       aria-labelledby="list-profile-list"
     >
+      {% if uu_count!=0 %}
+      <h2>Movies recommended for you:</h2>
+      {% endif %}
       <button type="button" class="btn btn-primary">
         Recommendations <span class="badge badge-light">{{ uu_count }}</span>
       </button>
@@ -107,13 +122,15 @@
         >
           <a href="/movies/{{ uu.movie_id }}">
             <img
-              style="height: 400px;"
+              style="height: 450px;"
               class="card-img-top"
               src="{{ uu.poster }}"
             />
           </a>
           <div class="card-body">
-            <h5 class="card-title">{{ uu.title }} ({{ uu.year | int }})</h5>
+            <h5 class="card-title" style="height: 38px;">
+              {{ uu.title }} ({{ uu.year | int }})
+            </h5>
             <p class="card-text">
               Genres:
               {{ uu.genres | replace('\'', '') | replace('[', '') | replace(']', '') }}
@@ -128,10 +145,13 @@
     </div>
     <div
       id="ii"
-      class="tab-pane fade show active reco-type"
+      class="tab-pane fade reco-type"
       role="tabpanel"
       aria-labelledby="list-messages-list"
     >
+      {% if ii_count!=0 %}
+      <h2>Movies recommended for you:</h2>
+      {% endif %}
       <button type="button" class="btn btn-primary">
         Recommendations <span class="badge badge-light">{{ ii_count }}</span>
       </button>
@@ -144,13 +164,15 @@
         >
           <a href="/movies/{{ ii.movie_id }}">
             <img
-              style="height: 400px;"
+              style="height: 450px;"
               class="card-img-top"
               src="{{ ii.poster }}"
             />
           </a>
           <div class="card-body">
-            <h5 class="card-title">{{ ii.title }} ({{ ii.year | int }})</h5>
+            <h5 class="card-title" style="height: 38px;">
+              {{ ii.title }} ({{ ii.year | int }})
+            </h5>
             <p class="card-text">
               Genres:
               {{ ii.genres | replace('\'', '') | replace('[', '') | replace(']', '') }}
@@ -172,13 +194,15 @@
     <div class="card col-12 col-sm-5 col-md-4 col-lg-3" style="padding: 2px;">
       <a href="/movies/{{ movie.movie_id }}">
         <img
-          style="height: 400px;"
+          style="height: 450px;"
           class="card-img-top"
           src="{{ movie.poster }}"
         />
       </a>
       <div class="card-body">
-        <h5 class="card-title">{{ movie.title }} ({{ movie.year | int }})</h5>
+        <h5 class="card-title" style="height: 38px;">
+          {{ movie.title }} ({{ movie.year | int }})
+        </h5>
         <p class="card-text">
           Genres:
           {{ movie.genres | replace('\'', '') | replace('[', '') | replace(']', '') }}
