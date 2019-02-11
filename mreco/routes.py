@@ -277,31 +277,33 @@ def index():
         try:
             uu_list = user_user()
             print(uu_list)
-            uu_rec = list(uu_list.to_dict()['movie_id'].values())
+            uu_rec = list(uu_list.to_dict()['movie'].values())
             print(uu_rec)
             uu_movies = []
             for uuu in uu_rec:
                 uu_movies.append(Movie.objects.get(movie_id=uuu))
             for i in range(len(uu_movies)):
                 print(uu_movies[i].title)
-        except (pd.core.base.DataError, IndexError, ValueError, NameError, KeyError):
+        except (pd.core.base.DataError, IndexError, ValueError, NameError, KeyError) as e:
+            print(e)
             uu_rec = []
             uu_movies = []
-        print(len(uu_movies))
+        print('uu_count='+str(len(uu_movies)))
         try:
             ii_list = item_item()
             print(ii_list)
-            ii_rec = list(ii_list.to_dict()['movie_id'].values())
+            ii_rec = list(ii_list.to_dict()['movie'].values())
             print(ii_rec)
             ii_movies = []
             for iiu in ii_rec:
                 ii_movies.append(Movie.objects.get(movie_id=iiu))
             for i in range(len(ii_movies)):
                 print(ii_movies[i].title)
-        except(pd.core.base.DataError, IndexError, ValueError, NameError, KeyError):
+        except(pd.core.base.DataError, IndexError, ValueError, NameError, KeyError) as e:
+            print(e)
             ii_rec = []
             ii_movies = []
-        print(len(ii_movies))
+        print('ii_count='+str(len(ii_movies)))
         try:
             mf_list = matrix_factorization()
             print(mf_list[1])

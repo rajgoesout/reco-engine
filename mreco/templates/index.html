@@ -19,45 +19,153 @@
 {% endblock %} {% block content %}
 <h1>mreco</h1>
 <div class="homepage">
-  <h2>Hi, {{ this_u | replace('[', '') | replace(']', '') }}!</h2>
+  <h2>Hi, {{ this_u | replace('[', '') | replace(']', '') }}! View <a href="#all-movies">all movies</a> </h2>
+  <div class="list-group" id="list-tab" role="tablist">
+    <a
+      class="list-group-item list-group-item-action active"
+      id="list-home-list"
+      data-toggle="list"
+      href="#mf"
+      role="tab"
+      aria-controls="home"
+      >Matrix Factorization</a
+    >
+    <a
+      class="list-group-item list-group-item-action"
+      id="list-profile-list"
+      data-toggle="list"
+      href="#uu"
+      role="tab"
+      aria-controls="profile"
+      >User-user Collaborative Filtering</a
+    >
+    <a
+      class="list-group-item list-group-item-action"
+      id="list-messages-list"
+      data-toggle="list"
+      href="#ii"
+      role="tab"
+      aria-controls="messages"
+      >Item-item Collaborative Filtering</a
+    >
+  </div>
+  </div>
   <h2>Movies recommended for you:</h2>
-  <button type="button" class="btn btn-primary">
-    Recommendations <span class="badge badge-light">{{ mf_count }}</span>
-  </button>
-  <br />
-  <div class="container-fluid row">
-    {% for mm in mf_movies %}
-    <div class="card col-12 col-sm-5 col-md-4 col-lg-3" style="padding: 2px;">
-      <a href="/movies/{{ mm.movie_id }}">
-        <img
-          style="height: 400px;"
-          class="card-img-top"
-          src="{{ mm.poster }}"
-        />
-      </a>
-      <div class="card-body">
-        <h5 class="card-title">{{ mm.title }} ({{ mm.year | int }})</h5>
-        <p class="card-text">
-          Genres:
-          {{ mm.genres | replace('\'', '') | replace('[', '') | replace(']', '') }}
-        </p>
-        <a href="/movies/{{ mm.movie_id }}" class="btn btn-primary"
-          >View details / Rate</a
+  <div class="tab-content" id="nav-tabContent">
+    <div
+      id="mf"
+      class="tab-pane fade show active reco-type"
+      role="tabpanel"
+      aria-labelledby="list-home-list"
+    >
+      <button type="button" class="btn btn-primary">
+        Recommendations <span class="badge badge-light">{{ mf_count }}</span>
+      </button>
+      <br />
+      <div class="container-fluid row">
+        {% for mm in mf_movies %}
+        <div
+          class="card col-12 col-sm-5 col-md-4 col-lg-3"
+          style="padding: 2px;"
         >
+          <a href="/movies/{{ mm.movie_id }}">
+            <img
+              style="height: 400px;"
+              class="card-img-top"
+              src="{{ mm.poster }}"
+            />
+          </a>
+          <div class="card-body">
+            <h5 class="card-title">{{ mm.title }} ({{ mm.year | int }})</h5>
+            <p class="card-text">
+              Genres:
+              {{ mm.genres | replace('\'', '') | replace('[', '') | replace(']', '') }}
+            </p>
+            <a href="/movies/{{ mm.movie_id }}" class="btn btn-primary"
+              >View details / Rate</a
+            >
+          </div>
+        </div>
+        {% endfor %}
       </div>
     </div>
-    {% endfor %}
+    <div
+      id="uu"
+      class="tab-pane fade show active reco-type"
+      role="tabpanel"
+      aria-labelledby="list-profile-list"
+    >
+      <button type="button" class="btn btn-primary">
+        Recommendations <span class="badge badge-light">{{ uu_count }}</span>
+      </button>
+      <br />
+      <div class="container-fluid row">
+        {% for uu in uu_movies %}
+        <div
+          class="card col-12 col-sm-5 col-md-4 col-lg-3"
+          style="padding: 2px;"
+        >
+          <a href="/movies/{{ uu.movie_id }}">
+            <img
+              style="height: 400px;"
+              class="card-img-top"
+              src="{{ uu.poster }}"
+            />
+          </a>
+          <div class="card-body">
+            <h5 class="card-title">{{ uu.title }} ({{ uu.year | int }})</h5>
+            <p class="card-text">
+              Genres:
+              {{ uu.genres | replace('\'', '') | replace('[', '') | replace(']', '') }}
+            </p>
+            <a href="/movies/{{ uu.movie_id }}" class="btn btn-primary"
+              >View details / Rate</a
+            >
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div
+      id="ii"
+      class="tab-pane fade show active reco-type"
+      role="tabpanel"
+      aria-labelledby="list-messages-list"
+    >
+      <button type="button" class="btn btn-primary">
+        Recommendations <span class="badge badge-light">{{ ii_count }}</span>
+      </button>
+      <br />
+      <div class="container-fluid row">
+        {% for ii in ii_movies %}
+        <div
+          class="card col-12 col-sm-5 col-md-4 col-lg-3"
+          style="padding: 2px;"
+        >
+          <a href="/movies/{{ ii.movie_id }}">
+            <img
+              style="height: 400px;"
+              class="card-img-top"
+              src="{{ ii.poster }}"
+            />
+          </a>
+          <div class="card-body">
+            <h5 class="card-title">{{ ii.title }} ({{ ii.year | int }})</h5>
+            <p class="card-text">
+              Genres:
+              {{ ii.genres | replace('\'', '') | replace('[', '') | replace(']', '') }}
+            </p>
+            <a href="/movies/{{ ii.movie_id }}" class="btn btn-primary"
+              >View details / Rate</a
+            >
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
   </div>
-  {% for ym in ur_movies %}
-  <p>{{ ym.title }} ({{ ym.year | int }})</p>
-  <p>
-    Genres:
-    {{ ym.genres | replace('\'', '') | replace('[', '') | replace(']', '') }}
-  </p>
-  <a href="/movies/{{ ym.movie_id }}"><img src="{{ ym.poster }}"/></a>
-  {% endfor %}
   <br />
-  <h1>Here are all your movies</h1>
+  <h1 id="all-movies">Here are all your movies</h1>
   <h1>Please click on a movie to rate</h1>
   <div class="container-fluid row">
     {% for movie in movies %}
