@@ -41,11 +41,19 @@ $ flask run
 
 ### Directory Structure
 
-```bash
+```
 .
 ├── Procfile
 ├── README.md
 ├── data.json
+├── dump
+│   └── imovies
+│       ├── movie.bson
+│       ├── movie.metadata.json
+│       ├── rating.bson
+│       ├── rating.metadata.json
+│       ├── user.bson
+│       └── user.metadata.json
 ├── instance
 ├── m.csv
 ├── mreco
