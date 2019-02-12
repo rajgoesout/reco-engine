@@ -39,6 +39,47 @@ $ flask run
 - Heroku (Cloud Application Platform)
 - Bootstrap (Frontend Framework)
 
+### Directory Structure
+
+```
+.
+├── Procfile
+├── README.md
+├── data.json
+├── dump
+│   └── imovies
+│       ├── movie.bson
+│       ├── movie.metadata.json
+│       ├── rating.bson
+│       ├── rating.metadata.json
+│       ├── user.bson
+│       └── user.metadata.json
+├── instance
+├── m.csv
+├── mreco
+│   ├── __init__.py
+│   ├── forms.py
+│   ├── models.py
+│   ├── recommender.py
+│   ├── routes.py
+│   ├── static
+│   │   ├── logo.png
+│   │   └── mr.png
+│   └── templates
+│       ├── auth
+│       │   ├── login.html
+│       │   └── register.html
+│       ├── base.html
+│       ├── index.html
+│       ├── movie.html
+│       └── user.html
+├── r.csv
+├── r2.csv
+├── requirements.txt
+├── runtime.txt
+└── u.csv
+```
+
 ### Credits
 
 Inspired by [https://towardsdatascience.com/the-4-recommendation-engines-that-can-predict-your-movie-tastes-109dc4e10c52](https://towardsdatascience.com/the-4-recommendation-engines-that-can-predict-your-movie-tastes-109dc4e10c52) and [https://towardsdatascience.com/how-to-build-a-simple-song-recommender-296fcbc8c85](https://towardsdatascience.com/how-to-build-a-simple-song-recommender-296fcbc8c85)
