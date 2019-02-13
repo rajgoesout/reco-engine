@@ -245,7 +245,7 @@ class user_similarity_recommender_py():
         self.cooccurence_matrix = None
         self.movies_dict = None
         self.rev_movies_dict = None
-        self.item_similarity_recommendations = None
+        self.user_similarity_recommendations = None
 
     # Get unique items (movies) corresponding to a given user
     def get_user_items(self, user):
