@@ -9,7 +9,7 @@ from mreco import app, login
 from mreco.forms import LoginForm, RegistrationForm, RatingForm
 from mreco.models import Movie, User, Rating
 from mreco.recommender import (
-    popularity_recommender_py, item_similarity_recommender_py, user_similarity_recommender_py)
+    item_similarity_recommender_py, user_similarity_recommender_py)
 
 import pandas as pd
 import numpy as np
@@ -18,7 +18,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics.pairwise import pairwise_distances
 from scipy.sparse.linalg import svds
-# from surprise import Reader, Dataset, SVD, evaluate, model_selection
 
 
 def generate_csv():
@@ -185,9 +184,6 @@ def item_item():
 def recommend_movies(predictions, userID, movies, original_ratings, num_recommendations):
     """Get and sort the user's predictions"""
     user_row_number = userID - 1  # User ID starts at 1, not 0
-    # print(dir(predictions))
-    # print('itrows: '+str(predictions.iterrows()))
-    # print(original_ratings.loc[original_ratings['user_id']==userID])
     sorted_user_predictions = predictions.iloc[user_row_number].sort_values(
         ascending=False
     )  # User ID starts at 1
@@ -241,7 +237,7 @@ def matrix_factorization():
     user_ratings_mean = np.mean(R, axis=1)
     Ratings_demeaned = R - user_ratings_mean.reshape(-1, 1)
     sparsity = round(1.0 - len(ratings) / float(n_users * n_movies), 3)
-    print('The sparsity level of MovieLens1M dataset is ' +
+    print('The sparsity level of the dataset is ' +
           str(sparsity * 100) + '%')
     U, sigma, Vt = svds(Ratings_demeaned, k=1)
     sigma = np.diag(sigma)
@@ -326,13 +322,6 @@ def index():
             title='Home', this_u=this_u, current_user=current_user, movies=movies)
     except KeyError:
         return redirect(url_for('login'))
-
-
-@app.route('/users/<username>', methods=['GET'])
-def show_user(username):
-    User.objects.all()
-    user = User.objects.get(username=username)
-    return render_template('user.html', user=user)
 
 
 @app.route('/movies/<int:movie_id>', methods=['GET', 'POST'])
