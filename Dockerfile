@@ -10,6 +10,6 @@ EXPOSE 5000
 
 ENV NAME World
 ENV FLASK_APP mreco
-ENV FLASK_ENV development
+ENV FLASK_ENV production
 
 CMD ["flask", "run"]

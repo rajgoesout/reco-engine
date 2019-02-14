@@ -13,6 +13,9 @@
 - [x] Implement Collaborative filtering (CF) algorithms
 - [x] Implement Matrix Factorization algorithm
 - [x] Deploy on heroku
+- [x] Create docker container
+- [ ] Write tests (WIP)
+- [ ] Add Continuous Integration (WIP)
 
 ### Getting started
 
@@ -52,6 +55,7 @@ $ flask run
 - Database Service (used in production) - [mlab](https://mlab.com/)
 - Cloud Application Platform - [Heroku](https://www.heroku.com/)
 - Frontend Framework - [Bootstrap](https://getbootstrap.com/)
+- Container Platform - [Docker](https://www.docker.com/)
 
 ### Directory Structure
 
@@ -130,6 +134,8 @@ $ flask run
 
 - `mreco/routes.py` contains all the url routes, and also a method `matrix_factorization` where the Dimensionality Reduction (low ranked matrix factorization) based algorithm has been implemented. I have used Singular Value Decomposition (SVD) to create a low ranked matrix.
 
+- This app currently generated `csv` files of ratings and users, so it isn't very efficient. However it can be improved by making lesser calls to the function generating the csv files or by directly creating pandas dataframes from the database.
+
 ### Conclusion
 
 - Item-item CF works well when there are a larger number of items(movies) as compared to the number of users.
@@ -137,6 +143,15 @@ $ flask run
 - The above 2 algorithms aren't helpful to solve the 'cold start problem', i.e., when there are very few items rated, and there's no similarity between items/users. You might have seen in the webapp, whenever you're creating a new account and rating one or two movies, then you might get `0` recommendations using the above CF algorithms.
 - To solve the cold start problem, we use Matrix factorization method. Let's say we have a new user who hasn't watched enough movies yet, but we can still recommend movies to that user.
 - We can't generalize and consider any of these as the best algorithm, it depends on the situation and needs. If the user wants to see the most popular movies then we would use a simple popularity based recommender, which would give us the desired results.
+
+### Setting up using Docker
+
+- Create an account on https://mlab.com/ and follow the instructions provided there to import the movies dataset from your local MongoDB database (do this after importing the dataset into your own mongodb `/data/db` directory).
+- Open `__init__.py` and update your mlab credentials (`MONGODB_HOST`, `MONGODB_USERNAME`, `MONGODB_PASSWORD`).
+- Run [docker desktop](https://www.docker.com/products/docker-desktop) on your machine.
+- `cd` into this repository and run: `docker build --tag=mreco .`
+- `docker run -p 4000:80 mreco`
+- Visit http://localhost:4000 to see `mreco` in action!
 
 ### Credits
 
