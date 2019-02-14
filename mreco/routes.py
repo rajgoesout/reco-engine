@@ -167,17 +167,21 @@ def matrix_factorization():
     rlist = list(ratings['user_id'].unique())
     print('ideal'+str(ideal))
     print('rlist'+str(rlist))
+    userID = u_df[u_df['uid'] ==
+                  str(int(str(session['user_id']), 16))].index[0]+1
+    print(userID)
     if ideal != rlist:
         difference = list(set(ideal)-set(rlist))
         print(difference)
         dfs = []
         for d in difference:
-            uid = u_df.at[d-1, 'uid']
-            print('uid='+str(uid))
-            dfs.append(pd.DataFrame({'user_id': d,
-                                     'uid': uid,
-                                     'movie_id': 1,
-                                     'score': 0}, index=[0]))
+            if d != userID:
+                uid = u_df.at[d-1, 'uid']
+                print('uid='+str(uid))
+                dfs.append(pd.DataFrame({'user_id': d,
+                                         'uid': uid,
+                                         'movie_id': 1,
+                                         'score': 0}, index=[0]))
         print(dfs)
         for dfi in dfs:
             print(dfi)
