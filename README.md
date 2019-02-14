@@ -6,6 +6,14 @@
 - Item-item collaborative filtering (CF)
 - Dimensionality Reduction (Matrix Factorization)
 
+### Tasks
+
+- [x] Scrape Imdb and build mongodb collection
+- [x] Create web app
+- [x] Implement Collaborative filtering (CF) algorithms
+- [x] Implement Matrix Factorization algorithm
+- [x] Deploy on heroku
+
 ### Getting started
 
 Install a virtual environment on [mac/linux](https://www.codingforentrepreneurs.com/blog/install-django-on-mac-or-linux/) or [windows](https://www.codingforentrepreneurs.com/blog/install-python-django-on-windows)
@@ -122,13 +130,13 @@ $ flask run
 
 - `mreco/routes.py` contains all the url routes, and also a method `matrix_factorization` where the Dimensionality Reduction (low ranked matrix factorization) based algorithm has been implemented. I have used Singular Value Decomposition (SVD) to create a low ranked matrix.
 
-### Tasks
+### Conclusion
 
-- [x] Scrape Imdb and build mongodb collection
-- [x] Create web app
-- [x] Implement Collaborative filtering (CF) algorithms
-- [x] Implement Matrix Factorization algorithm
-- [x] Deploy on heroku
+- Item-item CF works well when there are a larger number of items(movies) as compared to the number of users.
+- User-user CF is more suited when number of users exceeds number of items.
+- The above 2 algorithms aren't helpful to solve the 'cold start problem', i.e., when there are very few items rated, and there's no similarity between items/users. You might have seen in the webapp, whenever you're creating a new account and rating one or two movies, then you might get `0` recommendations using the above CF algorithms.
+- To solve the cold start problem, we use Matrix factorization method. Let's say we have a new user who hasn't watched enough movies yet, but we can still recommend movies to that user.
+- We can't generalize and consider any of these as the best algorithm, it depends on the situation and needs. If the user wants to see the most popular movies then we would use a simple popularity based recommender, which would give us the desired results.
 
 ### Credits
 
