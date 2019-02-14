@@ -226,6 +226,34 @@ def matrix_factorization():
     ratings = generate_csv()
     print(movies)
     print(ratings)
+    u_df = pd.read_csv('u.csv')
+    print(u_df)
+    us = len(u_df.uid.unique())
+    ideal = []
+    for i in range(us):
+        ideal.append(i+1)
+    print(ratings.isnull().values.any())
+    rlist = list(ratings['user_id'].unique())
+    print('ideal'+str(ideal))
+    print('rlist'+str(rlist))
+    if ideal != rlist:
+        difference = list(set(ideal)-set(rlist))
+        print(difference)
+        dfs = []
+        for d in difference:
+            uid = u_df.at[d-1, 'uid']
+            print('uid='+str(uid))
+            dfs.append(pd.DataFrame({'user_id': d,
+                                     'uid': uid,
+                                     'movie_id': 1,
+                                     'score': 0}, index=[0]))
+        print(dfs)
+        for dfi in dfs:
+            print(dfi)
+            ratings = pd.concat([ratings, dfi],
+                                ignore_index=True, sort=True)
+        ratings = ratings.sort_values('user_id')
+        print(ratings)
     n_users = ratings.user_id.unique().shape[0]
     n_movies = ratings.movie_id.unique().shape[0]
     print('Number of users = ' + str(n_users) +
@@ -234,6 +262,7 @@ def matrix_factorization():
         index='user_id', columns='movie_id', values='score').fillna(0)
     print(Ratings)
     R = Ratings.as_matrix()
+    print('R', R)
     user_ratings_mean = np.mean(R, axis=1)
     Ratings_demeaned = R - user_ratings_mean.reshape(-1, 1)
     sparsity = round(1.0 - len(ratings) / float(n_users * n_movies), 3)
@@ -244,9 +273,11 @@ def matrix_factorization():
     all_user_predicted_ratings = np.dot(
         np.dot(U, sigma), Vt) + user_ratings_mean.reshape(-1, 1)
     preds = pd.DataFrame(all_user_predicted_ratings, columns=Ratings.columns)
+    print('preds')
     print(preds)
     userID = ratings.loc[ratings['uid'] ==
                          str(int(str(session['user_id']), 16)), 'user_id'].iloc[0]
+    print('userid', userID)
     already_rated, predictions = recommend_movies(
         preds, userID, movies, ratings, n_movies)
     print(already_rated)

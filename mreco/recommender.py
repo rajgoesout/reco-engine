@@ -361,13 +361,13 @@ class user_similarity_recommender_py():
         else:
             return df
 
-    # Create the item similarity based recommender system model
+    # Create the user similarity based recommender system model
     def create(self, train_data, user_id, item_id):
         self.train_data = train_data
         self.user_id = user_id
         self.item_id = item_id
 
-    # Use the item similarity based recommender system model to
+    # Use the user similarity based recommender system model to
     # make recommendations
     def recommend(self, user, k):
 
