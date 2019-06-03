@@ -20,7 +20,7 @@ Flask-SQLAlchemy==2.3.2
 Flask-WTF==0.14.2
 gunicorn==19.9.0
 itsdangerous==1.1.0
-Jinja2==2.10
+Jinja2==2.10.1
 joblib==0.13.1
 kiwisolver==1.0.1
 Mako==1.0.7
