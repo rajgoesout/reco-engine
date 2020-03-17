@@ -27,7 +27,7 @@ Mako==1.0.7
 MarkupSafe==1.1.0
 matplotlib==3.0.2
 mongoengine==0.16.3
-numpy==1.16.1
+numpy==1.18.2
 pandas==0.24.1
 passlib==1.7.1
 psycopg2==2.7.7
