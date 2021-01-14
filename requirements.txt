@@ -23,7 +23,7 @@ itsdangerous==1.1.0
 Jinja2==2.10
 joblib==0.13.1
 kiwisolver==1.0.1
-Mako==1.0.7
+Mako==1.1.4
 MarkupSafe==1.1.0
 matplotlib==3.0.2
 mongoengine==0.16.3
